@@ -4,7 +4,8 @@ from settings import *
 class BATSMAN(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        
+        self.animation_state = "start"
+
         # start animation images
         batsman_start_1 = pygame.image.load('graphics/batsman/start-1.png').convert_alpha()
         batsman_start_2 = pygame.image.load('graphics/batsman/start-2.png').convert_alpha()
@@ -17,21 +18,40 @@ class BATSMAN(pygame.sprite.Sprite):
         batsman_start_3 = pygame.transform.scale(batsman_start_3, (260,180))
         batsman_start_4 = pygame.transform.scale(batsman_start_4, (260,180))
         
+        # idle animation images
+        batsman_idle_1 = pygame.image.load('graphics/batsman/idle-1.png').convert_alpha()
+        batsman_idle_2 = pygame.image.load('graphics/batsman/idle-2.png').convert_alpha()
+        batsman_idle_3 = pygame.image.load('graphics/batsman/idle-3.png').convert_alpha()
+
+        # idle animation images - transformed
+        batsman_idle_1 = pygame.transform.scale(batsman_idle_1, (260,180))
+        batsman_idle_2 = pygame.transform.scale(batsman_idle_2, (260,180))
+        batsman_idle_3 = pygame.transform.scale(batsman_idle_3, (260,180))
+
         # start animation order
-        self.batsman_start = [
-            batsman_start_1, batsman_start_2, batsman_start_3, batsman_start_4]
+        self.batsman = [
+            batsman_start_1, batsman_start_2, batsman_start_3, 
+            batsman_start_4, batsman_idle_2, batsman_idle_3]
         self.player_index = 0
 		
-        self.image = self.batsman_start[self.player_index]  
+        self.image = self.batsman[self.player_index]  
         self.rect = self.image.get_rect(midbottom=pitch_mid_point)
 
-    def animation_state(self):
-        self.player_index += 0.1
-        if self.player_index >= len(self.batsman_start):self.player_index = 3
-        self.image = self.batsman_start[int(self.player_index)]
-    
+    def animation(self):
+
+        if self.animation_state == "start":
+            if self.player_index < 1: self.player_index += 0.01
+            elif 1 <= self.player_index < 4: self.player_index += 0.2 
+            elif self.player_index >= 4: self.animation_state = "idle"
+
+        elif self.animation_state == "idle":
+            self.player_index += 0.02
+            if self.player_index >= len(self.batsman): self.player_index = 4
+        
+        self.image = self.batsman[int(self.player_index)]
+
     def update(self):
-        self.animation_state()
+        self.animation()
 
 
 class BOWLER(pygame.sprite.Sprite):
