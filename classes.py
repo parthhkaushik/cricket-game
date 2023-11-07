@@ -65,7 +65,8 @@ class BOWLER(pygame.sprite.Sprite):
 class BALL(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("graphics/cricket-ball-8pixels.png")
+        self.image = pygame.image.load("graphics/cricket-ball.png")
+        self.image = pygame.transform.scale(self.image, (12,12))
         self.rect = self.image.get_rect(midbottom=(375,380))
     
     def update(self):
