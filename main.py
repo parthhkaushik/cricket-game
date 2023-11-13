@@ -19,9 +19,11 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        """
         if event.type == pygame.KEYDOWN:
                if event.key == pygame.K_SPACE:
                    ball.add(BALL())
+        """
 
     screen.fill("Light Blue")
 
