@@ -31,11 +31,11 @@ class BATSMAN(pygame.sprite.Sprite):
         try: self.frame_5 = pygame.image.load(f'graphics/{player}/{action}/frame-5.png').convert_alpha()
         except: self.frame_5 = ""
 
-        self.frame_1 = pygame.transform.scale(self.frame_1, (260,180))
-        self.frame_2 = pygame.transform.scale(self.frame_2, (260,180))
-        self.frame_3 = pygame.transform.scale(self.frame_3, (260,180))
-        self.frame_4 = pygame.transform.scale(self.frame_4, (260,180))
-        if self.frame_5 != "": self.frame_5 = pygame.transform.scale(self.frame_5, (260,180))
+        self.frame_1 = pygame.transform.scale(self.frame_1, (260,210))
+        self.frame_2 = pygame.transform.scale(self.frame_2, (260,210))
+        self.frame_3 = pygame.transform.scale(self.frame_3, (260,210))
+        self.frame_4 = pygame.transform.scale(self.frame_4, (260,210))
+        if self.frame_5 != "": self.frame_5 = pygame.transform.scale(self.frame_5, (260,210))
 
         # animation order
         self.player_index = 0
