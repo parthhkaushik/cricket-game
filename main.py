@@ -8,6 +8,9 @@ screen = pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption("Cricket")
 clock = pygame.time.Clock()
 
+pitch = pygame.image.load('graphics/background.jpg').convert()
+pitch = pygame.transform.scale(pitch, (screen_width, screen_height))
+
 player = pygame.sprite.GroupSingle()
 player.add(BATSMAN())
 
@@ -25,7 +28,7 @@ while True:
                    ball.add(BALL())
         """
 
-    screen.fill("Light Blue")
+    screen.blit(pitch, (0,0))
 
     player.draw(screen)
     player.update()
