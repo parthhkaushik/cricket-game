@@ -135,7 +135,7 @@ class BOWLER(pygame.sprite.Sprite):
         super().__init__()  
 
         # class variables
-        self.pos = (over_the_wicket, screen_height)      
+        self.pos = (over_the_wicket, screen_height-40)      
         self.t = 0
         self.wait = True
 
@@ -161,7 +161,7 @@ class BOWLER(pygame.sprite.Sprite):
         to ensure correct order of frames 
     """
     def animation(self):
-
+        
         if self.wait:
             self.t +=1
             if self.t >= 300:
@@ -179,7 +179,7 @@ class BOWLER(pygame.sprite.Sprite):
                     self.t = 0
                 
             else: self.frame_index += 0.25
-
+        
         # updating the image 
         self.image = self.frames[int(self.frame_index)]  
         self.rect = self.image.get_rect(midbottom=self.pos)
@@ -198,16 +198,16 @@ class BOWLER(pygame.sprite.Sprite):
 class BALL(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("graphics/cricket-ball.png")
-        self.image = pygame.transform.scale(self.image, (12,12))
-        self.rect = self.image.get_rect(midbottom=(375,380))
+        self.image = pygame.image.load("graphics/white-ball.png")
+        self.image = pygame.transform.scale(self.image, (10,10))
+        self.rect = self.image.get_rect(midbottom=ball_release_pt)
     
     def update(self):
         if self.rect.y >= 250:
-            self.rect.y += -5
+            self.rect.y += -3
             self.rect.x += 0.5
         else:
-            self.rect.y += -5
+            self.rect.y += -3
             self.rect.x -= 0.5
 
         if self.rect.y <= 175:

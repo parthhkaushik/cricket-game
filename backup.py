@@ -1,6 +1,22 @@
 import pygame
 from settings import *
 
+# FUNCTIONS
+
+def get_frames(player,action,scale=None):
+    # taking all the frames in a dictionary
+    frames, c = {}, 0
+    while True:
+        try:
+            file = f'graphics/{player}/{action}/frame-{c+1}.png'
+            frame = pygame.image.load(file).convert_alpha()
+            if scale != None:
+                frame = pygame.transform.scale(frame, scale)
+            frames[c] = frame
+            c+=1
+        except: break
+    return frames
+
 
 # SPRITES
 
@@ -8,42 +24,32 @@ class BATSMAN(pygame.sprite.Sprite):
 
     """
         SPRITE DESCRIPTION 
-        a single sprite for the player
+        a single batsman sprite for the player
     """
     def __init__(self):
         super().__init__()
-        self.animation_state = "start"
-        self.get_frames("batsman", "start")
 
         # class vaiables
         self.sign = 1        
         self.t = 0
         self.key_pressed = False
 
+        self.animation_state = "start"
+        self.update_frames("start")
+
     """ 
         get the correct images for the animation as frames
-        anomations have either 4 or 5 frames 
+        animations have either 4 or 5 frames 
     """
-    def get_frames(self, player, action):
+    def update_frames(self, action):
 
         # dictionary containing frames
-        self.frames = {}
+        self.frames = get_frames("batsman",action,scale=(225,197))
         self.frame_index = 0
-
-        # taking all the frames in a dictionary
-        c = 0
-        while True:
-            try:
-                file = f'graphics/{player}/{action}/frame-{c+1}.png'
-                frame = pygame.image.load(file).convert_alpha()
-                frame = pygame.transform.scale(frame, (225,197))
-                self.frames[c] = frame
-                c+=1
-            except: break
 
         # animation order
         self.image = self.frames[int(self.frame_index)]  
-        self.rect = self.image.get_rect(midbottom=pitch_mid_point)
+        self.rect = self.image.get_rect(midbottom=pitch_top_point)
 
     """
         check player input
@@ -51,7 +57,7 @@ class BATSMAN(pygame.sprite.Sprite):
     def player_input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.animation_state == "waiting":
-            self.get_frames("batsman", "straight-loft")
+            self.update_frames("straight-loft")
             self.animation_state = "shot" 
             self.sign = 1
 
@@ -65,7 +71,7 @@ class BATSMAN(pygame.sprite.Sprite):
             if self.frame_index < 1: self.frame_index += 0.01
             elif 1 <= self.frame_index < 3: self.frame_index += 0.2 
             elif self.frame_index >= 3: 
-                self.get_frames("batsman", "waiting")
+                self.update_frames("waiting")
                 self.animation_state = "waiting"
 
         elif self.animation_state == "waiting":
@@ -88,7 +94,7 @@ class BATSMAN(pygame.sprite.Sprite):
         elif self.animation_state == "shot":
 
             if self.sign == -1: 
-                self.get_frames("batsman", "start")
+                self.update_frames("start")
                 self.animation_state = "start"
                 self.key_pressed = False
             
@@ -106,7 +112,7 @@ class BATSMAN(pygame.sprite.Sprite):
 
         # updating the image 
         self.image = self.frames[int(self.frame_index)]  
-        self.rect = self.image.get_rect(midbottom=pitch_mid_point)
+        self.rect = self.image.get_rect(midbottom=pitch_top_point)
 
     """
         to update the sprite
@@ -120,26 +126,88 @@ class BATSMAN(pygame.sprite.Sprite):
 
 
 class BOWLER(pygame.sprite.Sprite):
-    def __init__(self, type):
-        pass
 
+    """
+        SPRITE DESCRIPTION 
+        a single bowler sprite for the computer
+    """
+    def __init__(self):
+        super().__init__()  
+
+        # class variables
+        self.pos = (over_the_wicket, screen_height-40)      
+        self.t = 0
+        self.wait = True
+
+        self.animation_state = "fast"
+        self.update_frames("fast")
+
+    """ 
+        get the correct images for the animation as frames
+        bowling animations have around 30 frames
+    """
+    def update_frames(self, action):
+
+        # dictionary containing frames
+        self.frames = get_frames("bowler",action,(355,400))
+        self.frame_index = 0
+
+        # animation order
+        self.image = self.frames[int(self.frame_index)]  
+        self.rect = self.image.get_rect(midbottom=self.pos)
+
+    """
+        get frames according to the animation playing
+        to ensure correct order of frames 
+    """
+    def animation(self):
+
+        if self.wait:
+            self.t +=1
+            if self.t >= 300:
+                self.t = 0
+                self.wait = False
+
+        else:
+            if self.frame_index >= len(self.frames)-1: 
+                self.t += 1
+                
+                # time delay after last frame
+                if self.t >= 180: 
+                    self.wait = True
+                    self.frame_index = 0
+                    self.t = 0
+                
+            else: self.frame_index += 0.25
+
+        # updating the image 
+        self.image = self.frames[int(self.frame_index)]  
+        self.rect = self.image.get_rect(midbottom=self.pos)
+
+
+    """
+        to update the sprite
+        60 frames per second
+        1 frame - 1.66 second
+    """
     def update(self):
-        pass
+        self.animation()
+
 
 
 class BALL(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("graphics/cricket-ball.png")
-        self.image = pygame.transform.scale(self.image, (12,12))
-        self.rect = self.image.get_rect(midbottom=(375,380))
+        self.image = pygame.image.load("graphics/white-ball.png")
+        self.image = pygame.transform.scale(self.image, (10,10))
+        self.rect = self.image.get_rect(midbottom=ball_release_pt)
     
     def update(self):
         if self.rect.y >= 250:
-            self.rect.y += -5
+            self.rect.y += -3
             self.rect.x += 0.5
         else:
-            self.rect.y += -5
+            self.rect.y += -3
             self.rect.x -= 0.5
 
         if self.rect.y <= 175:
