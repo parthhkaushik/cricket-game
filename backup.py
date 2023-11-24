@@ -2,6 +2,8 @@ import pygame
 from settings import *
 
 
+# SPRITES
+
 class BATSMAN(pygame.sprite.Sprite):
 
     """
@@ -24,23 +26,23 @@ class BATSMAN(pygame.sprite.Sprite):
     """
     def get_frames(self, player, action):
 
-        self.frame_1 = pygame.image.load(f'graphics/{player}/{action}/frame-1.png').convert_alpha()
-        self.frame_2 = pygame.image.load(f'graphics/{player}/{action}/frame-2.png').convert_alpha()
-        self.frame_3 = pygame.image.load(f'graphics/{player}/{action}/frame-3.png').convert_alpha()
-        self.frame_4 = pygame.image.load(f'graphics/{player}/{action}/frame-4.png').convert_alpha()
-        try: self.frame_5 = pygame.image.load(f'graphics/{player}/{action}/frame-5.png').convert_alpha()
-        except: self.frame_5 = ""
+        # dictionary containing frames
+        self.frames = {}
+        self.frame_index = 0
 
-        self.frame_1 = pygame.transform.scale(self.frame_1, (260,210))
-        self.frame_2 = pygame.transform.scale(self.frame_2, (260,210))
-        self.frame_3 = pygame.transform.scale(self.frame_3, (260,210))
-        self.frame_4 = pygame.transform.scale(self.frame_4, (260,210))
-        if self.frame_5 != "": self.frame_5 = pygame.transform.scale(self.frame_5, (260,210))
+        # taking all the frames in a dictionary
+        c = 0
+        while True:
+            try:
+                file = f'graphics/{player}/{action}/frame-{c+1}.png'
+                frame = pygame.image.load(file).convert_alpha()
+                frame = pygame.transform.scale(frame, (225,197))
+                self.frames[c] = frame
+                c+=1
+            except: break
 
         # animation order
-        self.player_index = 0
-        self.batsman = [self.frame_1, self.frame_2, self.frame_3, self.frame_4, self.frame_5]
-        self.image = self.batsman[int(self.player_index)]  
+        self.image = self.frames[int(self.frame_index)]  
         self.rect = self.image.get_rect(midbottom=pitch_mid_point)
 
     """
@@ -49,7 +51,7 @@ class BATSMAN(pygame.sprite.Sprite):
     def player_input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.animation_state == "waiting":
-            self.get_frames("batsman", "straight-stroke")
+            self.get_frames("batsman", "straight-loft")
             self.animation_state = "shot" 
             self.sign = 1
 
@@ -60,18 +62,18 @@ class BATSMAN(pygame.sprite.Sprite):
     def animation(self):
 
         if self.animation_state == "start":
-            if self.player_index < 1: self.player_index += 0.01
-            elif 1 <= self.player_index < 3: self.player_index += 0.2 
-            elif self.player_index >= 3: 
+            if self.frame_index < 1: self.frame_index += 0.01
+            elif 1 <= self.frame_index < 3: self.frame_index += 0.2 
+            elif self.frame_index >= 3: 
                 self.get_frames("batsman", "waiting")
                 self.animation_state = "waiting"
 
         elif self.animation_state == "waiting":
             
-            if self.player_index <= 0: 
+            if self.frame_index <= 0: 
                 self.sign = 1
 
-            elif self.player_index >= 2: 
+            elif self.frame_index >= 2: 
                 self.sign = 0
                 self.t += 1
             
@@ -81,7 +83,7 @@ class BATSMAN(pygame.sprite.Sprite):
                 self.t = 0
 
             # updating the frame
-            self.player_index += self.sign * 0.2
+            self.frame_index += self.sign * 0.2
 
         elif self.animation_state == "shot":
 
@@ -90,20 +92,20 @@ class BATSMAN(pygame.sprite.Sprite):
                 self.animation_state = "start"
                 self.key_pressed = False
             
-            elif self.player_index >= len(self.batsman)-1: 
+            elif self.frame_index >= len(self.frames)-1: 
                 self.sign = 0
                 self.t += 1
 
             # time delay after last frame
-            if self.t >= 120: 
+            if self.t >= 150: 
                 self.sign = -1
                 self.t = 0
 
             # updating the frame
-            self.player_index += self.sign*0.2
+            self.frame_index += self.sign*0.25
 
         # updating the image 
-        self.image = self.batsman[int(self.player_index)]  
+        self.image = self.frames[int(self.frame_index)]  
         self.rect = self.image.get_rect(midbottom=pitch_mid_point)
 
     """

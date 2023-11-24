@@ -14,6 +14,9 @@ pitch = pygame.transform.scale(pitch, (screen_width, screen_height))
 player = pygame.sprite.GroupSingle()
 player.add(BATSMAN())
 
+computer = pygame.sprite.GroupSingle()
+computer.add(BOWLER())
+
 ball = pygame.sprite.GroupSingle()
 
 
@@ -28,12 +31,16 @@ while True:
                    ball.add(BALL())
         """
 
-    screen.blit(pitch, (0,0))
+    screen.blit(pitch,(0,0))
 
     player.draw(screen)
     player.update()
+    computer.draw(screen)
+    computer.update()
+
+    """
     ball.draw(screen)
     ball.update()
-
+    """
     pygame.display.update()
     clock.tick(60)
