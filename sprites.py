@@ -18,6 +18,10 @@ def get_frames(player,action,scale=None):
     return frames
 
 
+# USER EVENTS
+THROW_BALL = pygame.USEREVENT +1
+
+
 # SPRITES
 
 class BATSMAN(pygame.sprite.Sprite):
@@ -184,6 +188,11 @@ class BOWLER(pygame.sprite.Sprite):
         self.image = self.frames[int(self.frame_index)]  
         self.rect = self.image.get_rect(midbottom=self.pos)
 
+    """
+    """
+    def throw_ball(self):
+        if int(self.frame_index) == 19:
+            pygame.event.post(pygame.event.Event(THROW_BALL))
 
     """
         to update the sprite
@@ -192,6 +201,7 @@ class BOWLER(pygame.sprite.Sprite):
     """
     def update(self):
         self.animation()
+        self.throw_ball()
 
 
 
@@ -199,13 +209,13 @@ class BALL(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.image.load("graphics/white-ball.png")
-        self.image = pygame.transform.scale(self.image, (10,10))
+        self.image = pygame.transform.scale(self.image, (8,8))
         self.rect = self.image.get_rect(midbottom=ball_release_pt)
-    
+
     def update(self):
-        if self.rect.y >= 250:
-            self.rect.y += -3
-            self.rect.x += 0.5
+        if self.rect.y >= 210:
+            self.rect.y += -1
+            self.rect.x += 1.5
         else:
             self.rect.y += -3
             self.rect.x -= 0.5
