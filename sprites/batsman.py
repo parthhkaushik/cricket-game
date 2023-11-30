@@ -2,12 +2,12 @@ import pygame
 from module import *
 from settings import *
 
-# variables
-t_player_input = 0
-
-
 class BATSMAN(pygame.sprite.Sprite):
+    shot = "stroke"
+    direction = "straight"
     delivery_played = False
+    t_player_input = 0
+    key_pressed = False
 
     """
         SPRITE DESCRIPTION 
@@ -19,7 +19,6 @@ class BATSMAN(pygame.sprite.Sprite):
         # class vaiables
         self.sign = 1        
         self.t = 0
-        self.key_pressed = False
 
         self.animation_state = "start"
         self.update_frames("start")
@@ -44,13 +43,14 @@ class BATSMAN(pygame.sprite.Sprite):
     def player_input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.animation_state == "waiting":
-            self.update_frames("straight-loft")
-            self.animation_state = "shot" 
+            BATSMAN.t_player_input = pygame.time.get_ticks()
             self.sign = 1
-            global t_player_input
-            t_player_input = pygame.time.get_ticks()
-            print("batsman", t_player_input)
+            BATSMAN.key_pressed = True
 
+    def updated(self):
+        self.update_frames(BATSMAN.direction + "-" + BATSMAN.shot)
+        self.animation_state = "shot" 
+            
     """
         get frames according to the animation playing
         to ensure correct order of frames 
@@ -86,20 +86,18 @@ class BATSMAN(pygame.sprite.Sprite):
             if self.sign == -1: 
                 self.update_frames("start")
                 self.animation_state = "start"
-                self.key_pressed = False
             
             elif self.frame_index >= len(self.frames)-1: 
                 self.sign = 0
                 self.t += 1
-
+                BATSMAN.delivery_played = True
+            
             # time delay after last frame
             if self.t >= 300: 
                 self.sign = -1
                 self.t = 0
-                BATSMAN.delivery_played = False
-
-            if self.t >= 150:
-                BATSMAN.delivery_played = True
+                BATSMAN.delivery_played = False  
+                BATSMAN.key_pressed = False       
 
             # updating the frame
             self.frame_index += self.sign*0.25
@@ -116,6 +114,7 @@ class BATSMAN(pygame.sprite.Sprite):
     def update(self):
         self.animation()
         self.player_input()
+            
 
 
 class NON_STRIKER(pygame.sprite.Sprite):

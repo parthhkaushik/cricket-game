@@ -2,14 +2,8 @@ import pygame, random
 from module import *
 from settings import *
 
-# VARIABLES
-t_ball_released = 0
-
-# USER EVENTS
-THROW_BALL = pygame.USEREVENT +1
-
-
 class BOWLER(pygame.sprite.Sprite):
+    t_ball_released = 0
 
     """
         SPRITE DESCRIPTION 
@@ -73,9 +67,7 @@ class BOWLER(pygame.sprite.Sprite):
     def throw_ball(self):
         if int(self.frame_index) == 19:
             pygame.event.post(pygame.event.Event(THROW_BALL))
-            global t_ball_released
-            t_ball_released = pygame.time.get_ticks()
-            print(t_ball_released)
+            BOWLER.t_ball_released = pygame.time.get_ticks()
 
     """
         to update the sprite
@@ -88,30 +80,40 @@ class BOWLER(pygame.sprite.Sprite):
 
 
 class BALL(pygame.sprite.Sprite):
+    direction = "straight"
 
     def __init__(self):
         super().__init__()
         self.image = pygame.image.load("graphics/white-ball.png")
         self.image = pygame.transform.scale(self.image,(8,8))
         self.rect = self.image.get_rect(midbottom=ball_release_pt)
+        BALL.rebound = False
         
-        self.points = [{"dx":(3.5,-0.5),"dy":(2,3),"length":210,"shot_dir":"straight-1"}]
+        self.points = [{"dx":(4.5,-0.5),"dy":(2,3),"length":212,"shot_dir":"straight"}]
         points = [
-            {"dx":(1.5,-0.5),"dy":(1,3),"length":210,"shot_dir":"straight-1"},
-            {"dx":(3.5,0),"dy":(1,3),"length":215,"shot_dir":"right-1"},
-            {"dx":(1.5,0),"dy":(1.5,3),"length":225,"shot_dir":"left-1"}
+            {"dx":(1.5,-0.5),"dy":(1,3),"length":200,"shot_dir":"straight"},
+            {"dx":(3.5,0),"dy":(1,3),"length":215,"shot_dir":"right"},
+            {"dx":(1.5,0),"dy":(1.5,3),"length":225,"shot_dir":"left"}
             ]
         self.d = random.choice(self.points)
+        BALL.direction = self.d["shot_dir"]
     
-    def update(self):
-        
+    def move(self):
+            
         if self.rect.y >= self.d["length"]:
             self.rect.x += self.d["dx"][0]
             self.rect.y -= self.d["dy"][0]
+
+        elif self.rect.y <= 160:
+            self.d = random.choice(self.points)
+            self.kill()  
+    
         else:
             self.rect.x += self.d["dx"][1]
             self.rect.y -= self.d["dy"][1]
 
-        if self.rect.y <= 175:
-            self.d = random.choice(self.points)
-            self.kill()
+    def update(self):
+        if BALL.rebound:
+            self.rect.x += 1.5
+            self.rect.y += 4
+        else: self.move()

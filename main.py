@@ -12,21 +12,28 @@ pygame.init()
 # variables
 runs_scored = 0
 flag = 0
+timing = 3
 
 def check_runs_scored():
-    if BATSMAN.delivery_played:
-        dr = abs(t_ball_released-t_player_input)
-        if dr <= 20:
-            global runs_scored
-            runs_scored = 6
-        elif dr <= 25:
-            runs_scored = 4
-        else:
-            global flag
-            if not flag: 
-                runs_scored = random.choice([1,1,1,2,2,3])
-                flag = 0
-
+    dr = abs(BOWLER.t_ball_released-BATSMAN.t_player_input)
+    if 80 <= dr <= 100:
+        global runs_scored
+        runs_scored = 6
+        BATSMAN.shot = "loft"
+        global timing
+        timing = 3
+    elif 60 <= dr <= 120:
+        runs_scored = 4
+        BATSMAN.shot = "stroke"
+        timing = 2
+    else:
+        BATSMAN.shot = "stroke"
+        timing = 1
+        global flag
+        if not flag: 
+            runs_scored = random.choice([1,1,1,2,2,3])
+            flag = 0
+    
 # game starts when it is True
 game_active = True
 
@@ -36,9 +43,10 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("Cricket 2023")
 
 # adding the sprites
-batsman_group = pygame.sprite.Group()
-batsman_group.add(BATSMAN())
-batsman_group.add(NON_STRIKER())
+batsman = pygame.sprite.GroupSingle()
+batsman.add(BATSMAN())
+non_striker = pygame.sprite.GroupSingle()
+non_striker.add(NON_STRIKER())
 
 umpire = pygame.image.load("graphics/umpire.png")
 umpire = pygame.transform.scale(umpire,(80,215))
@@ -62,20 +70,20 @@ pause = pygame.image.load("graphics/pause.png")
 pause = pygame.transform.scale(pause,(80,30))
 logo = pygame.image.load("graphics/logo.png")
 
-
 # game loop
+dt = 0
 while True:
     # 60 frames per second
     clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
-        if event.type == THROW_BALL:
-                ball.add(BALL())
-                NON_STRIKER.can_move = True              
-        if event.type == pygame.KEYDOWN and not game_active:
-                game_active = True
+             pygame.quit()
+             exit()
+        elif event.type == THROW_BALL:
+             ball.add(BALL())
+             NON_STRIKER.can_move = True                 
+        elif event.type == pygame.KEYDOWN and not game_active:
+             game_active = True   
     
     # checking for game active condition
     if game_active:
@@ -87,8 +95,10 @@ while True:
 
         bowler.draw(screen)
         bowler.update()        
-        batsman_group.draw(screen)
-        batsman_group.update()
+        batsman.draw(screen)
+        non_striker.draw(screen)
+        batsman.update()
+        non_striker.update()
 
         screen.blit(umpire,(screen_width/2-35,340))
         
@@ -96,13 +106,26 @@ while True:
         ball.draw(screen)
         
         # displaying the sccoreboard
-        SCOREBOARD().display_score(screen)
-        check_runs_scored() 
-        if BATSMAN.delivery_played: 
-             display_runs(runs_scored,screen)
-             flag = 1
-        else: flag = 0
-    
+        SCOREBOARD().display_score(screen) 
+        TIMING_BAR().blit(screen)
+
+        if BATSMAN.key_pressed:
+            check_runs_scored()
+            batsman.sprite.updated()
+            BATSMAN.key_pressed = False
+            flag = 1 
+        else:
+            flag = 0
+
+        if BATSMAN.delivery_played:
+             dt+=1 
+             if dt >= 120: 
+                 display_runs(runs_scored,screen)    
+                 TIMING_BAR().update(timing) 
+                            
+        else:
+            dt = 0
+
     else:
         # main menu
         screen.blit(img,(0,0))

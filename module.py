@@ -60,6 +60,39 @@ class TEXT():
         target.blit(txt,txt_rect)
 
 
+class TIMING_BAR():
+    timing, sign = 3, 0
+    color = "#32cd32"
+    x,y = screen_width-120,50
+
+    def blit(self,target):
+        rect = pygame.Rect(screen_width-220,50,210,10)
+        pygame.draw.rect(target,"#343434",rect)
+
+        rect = pygame.Rect(TIMING_BAR.x,TIMING_BAR.y,20,10)
+        pygame.draw.rect(target,TIMING_BAR.color,rect)
+        TEXT().blit("EARLY",target,(screen_width-200,65),12,color=(255,255,255))
+        TEXT().blit("PERFECT",target,(screen_width-110,65),12,color=(255,255,255))
+        TEXT().blit("LATE",target,(screen_width-30,65),12,color=(255,255,255))
+
+    def update(self,timing,sign=0):
+        TIMING_BAR.timing = timing
+        TIMING_BAR.sign = sign
+        if TIMING_BAR.timing == 3:
+            TIMING_BAR.color = "#32cd32"
+            TIMING_BAR.x,TIMING_BAR.y = screen_width-120,50
+        elif TIMING_BAR.timing == 2:
+            TIMING_BAR.color = "#ffd700"
+            TIMING_BAR.x,TIMING_BAR.y = screen_width-abs(TIMING_BAR.sign*240-150),50
+        elif TIMING_BAR.timing == 1:
+            TIMING_BAR.color = "#ff8c00"
+            TIMING_BAR.x,TIMING_BAR.y = screen_width-abs(TIMING_BAR.sign*250-180),50
+        else:
+            TIMING_BAR.color = "#b22222"
+            TIMING_BAR.x,TIMING_BAR.y = screen_width-abs(TIMING_BAR.sign*250-210),50
+        
+
+
 class PROGRESS_BAR():
     ds = 0
     loading = True
@@ -105,6 +138,7 @@ def get_frames(player,action,scale=None):
             c+=1
         except: break
     return frames
+
 
 def display_runs(runs,target):
     """
