@@ -80,6 +80,8 @@ class BOWLER(pygame.sprite.Sprite):
 
 
 class BALL(pygame.sprite.Sprite):
+    delivery_played = False
+    shot="loft"
     direction = "straight"
 
     def __init__(self):
@@ -89,28 +91,44 @@ class BALL(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom=ball_release_pt)
         BALL.rebound = False
         
-        self.points = [{"dx":(4.5,-0.5),"dy":(2,3),"length":212,"shot_dir":"straight"}]
+        self.points = [{"dx":(4.5,-0.5),"dy":(2,3),"length":210,"shot_dir":"straight"}]
         points = [
-            {"dx":(1.5,-0.5),"dy":(1,3),"length":200,"shot_dir":"straight"},
-            {"dx":(3.5,0),"dy":(1,3),"length":215,"shot_dir":"right"},
-            {"dx":(1.5,0),"dy":(1.5,3),"length":225,"shot_dir":"left"}
+            {"dx":(4.5,-0.5),"dy":(2,3),"length":210,"shot_dir":"straight"},
+            {"dx":(6,1),"dy":(1,6),"length":230,"shot_dir":"right"},
+            {"dx":(3,0.5),"dy":(2,4),"length":220,"shot_dir":"left"}
             ]
         self.d = random.choice(self.points)
         BALL.direction = self.d["shot_dir"]
     
     def move(self):
+        hit_pos = shots[BALL.direction+"-"+BALL.shot]["hit_pos"]
             
         if self.rect.y >= self.d["length"]:
             self.rect.x += self.d["dx"][0]
             self.rect.y -= self.d["dy"][0]
-
-        elif self.rect.y <= 160:
-            self.d = random.choice(self.points)
-            self.kill()  
-    
+        
         else:
             self.rect.x += self.d["dx"][1]
             self.rect.y -= self.d["dy"][1]
+
+        if BALL.delivery_played:
+
+            if self.rect.y <= hit_pos:
+                self.d = random.choice(self.points)
+                BALL.delivery_played = False
+                self.kill()
+
+            elif self.rect.y <= 0:
+                self.d = random.choice(self.points)
+                BALL.delivery_played = False
+                self.kill()
+        
+        else:
+            
+            if self.rect.y <= 140:
+                if BALL.direction == "straight":
+                    self.d = random.choice(self.points)
+                    self.kill()
 
     def update(self):
         if BALL.rebound:

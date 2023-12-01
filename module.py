@@ -116,19 +116,30 @@ def display_runs(runs,target):
     rect2 = pygame.Rect(screen_width/2-100,screen_height/2-90,200,180)
     pygame.draw.rect(target,"#B22222",rect2)
 
-    match runs:
-        case 6: txt = "SIX"
-        case 4: txt = "FOUR"
-        case 3: txt = "TRIPLE"
-        case 2: txt = "DOUBLE"
-        case 1: txt = "SINGLE"
-
-    if runs != 0:
-        TEXT().blit(str(runs),target,(screen_width/2,screen_height/2-20),132)
-        TEXT().blit(txt,target,(screen_width/2,screen_height/2+60),50,"Action_Man")
-    else:
+    if runs == 0:
         TEXT().blit("DOT",target,(screen_width/2,screen_height/2-30),50,"Action_Man")
         TEXT().blit("BALL",target,(screen_width/2,screen_height/2+30),50,"Action_Man")
+    
+    elif  runs in ["Bowled","Catch-Out","Caught"]:
+        match runs:
+            case "Bowled":
+                TEXT().blit("BOWLED",target,(screen_width/2,screen_height/2),50,"Action_Man")
+            case "Catch-Out":
+                TEXT().blit("CATCH",target,(screen_width/2,screen_height/2-30),50,"Action_Man")
+                TEXT().blit("OUT",target,(screen_width/2,screen_height/2+30),50,"Action_Man")
+            case "Caught":
+                TEXT().blit("CAUGHT",target,(screen_width/2,screen_height/2),50,"Action_Man")
+
+    else:
+        match runs:
+            case 6: txt = "SIX"
+            case 4: txt = "FOUR"
+            case 3: txt = "TRIPLE"
+            case 2: txt = "DOUBLE"
+            case 1: txt = "SINGLE"
+        TEXT().blit(str(runs),target,(screen_width/2,screen_height/2-20),132)
+        TEXT().blit(txt,target,(screen_width/2,screen_height/2+60),50,"Action_Man")
+        
 
 
 class TIMING_BAR():

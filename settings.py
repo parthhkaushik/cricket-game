@@ -4,8 +4,6 @@ from pygame import USEREVENT
 screen_width, screen_height = 800, 600
 scoreboard_height = 40
 
-
-
 # user events
 THROW_BALL = USEREVENT +1
 
@@ -17,6 +15,16 @@ over_the_wicket = screen_width/2 - 100
 
 # ball-bowler
 ball_release_pt = (325,250)
+
+# shots
+shots = {
+    "straight-loft":{"name":"lofted-straight","hit_pos":160},
+    "straight-stroke":{"name":"straight-drive","hit_pos":140},
+    "left-loft":{"name":"reverse_sweep","hit_pos":140},
+    "left-stroke":{"name":"cover-drive","hit_pos":145},
+    "right-loft":{"name":"pull-shot","hit_pos":90},
+    "right-stroke":{"name":"on-drive","hit_pos":145},
+}
 
 # color codes
 colors = {

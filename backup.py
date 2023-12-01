@@ -122,7 +122,7 @@ while True:
 
         if BATSMAN.delivery_played:
              dt+=1
-             TIMING_BAR().update(screen,timing)  
+             #TIMING_BAR().update(screen,timing)  
              if dt >= 120: 
                  display_runs(runs_scored,screen)    
                                   
@@ -138,7 +138,7 @@ while True:
         if not PROGRESS_BAR.loading:
             message = "PRESS ANY KEY TO CONTINUE"
             pos = (screen_width/2+15,screen_height-30)
-            TEXT().blit(message,screen,pos,bounce=True)   
+            #TEXT().blit(message,screen,pos,bounce=True)   
             
     
     # updating display

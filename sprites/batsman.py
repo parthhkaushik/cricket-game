@@ -43,12 +43,27 @@ class BATSMAN(pygame.sprite.Sprite):
     """
     def player_input(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE] and self.animation_state == "waiting":
-            BATSMAN.t_player_input = pygame.time.get_ticks()
-            self.sign = 1
-            BATSMAN.key_pressed = True
-
-    def updated(self):
+        if self.animation_state == "waiting":
+            if keys[pygame.K_LEFT]:
+                BATSMAN.direction = "left"
+                BATSMAN.t_player_input = pygame.time.get_ticks()
+                self.sign = 1
+                BATSMAN.key_pressed = True
+            elif keys[pygame.K_DOWN]:
+                BATSMAN.direction = "straight"
+                BATSMAN.t_player_input = pygame.time.get_ticks()
+                self.sign = 1
+                BATSMAN.key_pressed = True
+            elif keys[pygame.K_RIGHT]:
+                BATSMAN.direction = "right"
+                BATSMAN.t_player_input = pygame.time.get_ticks()
+                self.sign = 1
+                BATSMAN.key_pressed = True
+                
+    
+    """
+    """
+    def shot_select(self):
         self.update_frames(BATSMAN.direction + "-" + BATSMAN.shot)
         self.animation_state = "shot" 
             

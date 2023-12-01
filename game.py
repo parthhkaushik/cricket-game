@@ -9,28 +9,14 @@ from sprites.bowler import *
 # intialise pygame
 pygame.init()
 
-# variables
-runs_scored = 0
-
-def check_runs_scored():
-    dr = abs(BOWLER.t_ball_released-BATSMAN.t_player_input)
-    if 80 <= dr <= 100:
-        global runs_scored
-        runs_scored = 6
-        BATSMAN.shot = "loft"
-    elif 60 <= dr <= 120:
-        runs_scored = 4
-        BATSMAN.shot = "stroke"
-    else:
-        BATSMAN.shot = "stroke"
-        runs_scored = random.choice([1,1,1,2,2,3])
-
 
 class GAME():
-    pitch = pygame.image.load('graphics/background.jpg')
-    pitch = pygame.transform.scale(pitch,(screen_width,screen_height))
+    runs_scored,dr = 0,0
     
     # images
+    pitch = pygame.image.load('graphics/background.jpg')
+    pitch = pygame.transform.scale(pitch,(screen_width,screen_height))
+
     logo = pygame.image.load("graphics/logo.png")
     pause = pygame.image.load("graphics/pause.png")
     pause = pygame.transform.scale(pause,(80,30))
@@ -56,20 +42,63 @@ class GAME():
         blit_alpha(target, GAME.logo, (20,20), 128)
 
         # player and computer sprites
+        GAME.ball.draw(target)
+        GAME.ball.update()
+
         GAME.all_sprites.draw(target)
         for sprite in GAME.all_sprites.sprites():
             sprite.update()
-
-        GAME.ball.draw(target)
-        GAME.ball.update()
         target.blit(GAME.umpire,umpire_pos)
                 
         # displaying the sccoreboard
         SCOREBOARD().display_score(target) 
 
         if BATSMAN.key_pressed:
-            check_runs_scored()
-            GAME.all_sprites.sprites()[0].updated()
+            GAME.check_runs_scored()
+            GAME.all_sprites.sprites()[0].shot_select()
+            BALL.shot = BATSMAN.shot
+            BALL.delivery_played = True
             BATSMAN.key_pressed = False
 
-        if BATSMAN.display_runs: display_runs(runs_scored,target)                      
+        if BATSMAN.display_runs: display_runs(GAME.runs_scored,target)  
+
+    def check_runs_scored():
+        GAME.dr = BATSMAN.t_player_input-BOWLER.t_ball_released
+
+        if BATSMAN.direction == BALL.direction:
+
+            if 40 <= GAME.dr <= 100:
+                GAME.runs_scored = 6
+                BATSMAN.shot = "loft"
+            
+            elif 20 <= GAME.dr <= 120:
+                GAME.runs_scored = "Catch-Out"
+                BATSMAN.shot = "loft"
+
+            elif 0 <= GAME.dr <= 140:
+                GAME.runs_scored = 4
+                BATSMAN.shot = "stroke"
+
+            elif -200 <= GAME.dr <= 200:
+                BATSMAN.shot = "stroke"
+                GAME.runs_scored = random.choice([1,1,1,2,2,3])
+            
+            else: GAME.check_wicket()
+
+        else:
+            GAME.check_wicket() 
+
+    def check_wicket():
+
+        if BALL.direction != "straight":
+
+            if -220 <= GAME.dr <= 220 and BATSMAN.direction == BALL.direction:
+                GAME.runs_scored = "Caught"
+            else: 
+                GAME.runs_scored = 0
+                BALL.delivery_played = True
+        
+        else: GAME.runs_scored = "Bowled"
+            
+        
+        
