@@ -1,13 +1,14 @@
 import pygame
-from module import *
+from module import get_frames
 from settings import *
 
 class BATSMAN(pygame.sprite.Sprite):
     shot = "stroke"
     direction = "straight"
-    delivery_played = False
     t_player_input = 0
+    delivery_played = False
     key_pressed = False
+    display_runs = False
 
     """
         SPRITE DESCRIPTION 
@@ -96,8 +97,10 @@ class BATSMAN(pygame.sprite.Sprite):
             if self.t >= 300: 
                 self.sign = -1
                 self.t = 0
-                BATSMAN.delivery_played = False  
-                BATSMAN.key_pressed = False       
+                BATSMAN.delivery_played = False
+                BATSMAN.display_runs = False
+            elif self.t >= 120:
+                BATSMAN.display_runs = True
 
             # updating the frame
             self.frame_index += self.sign*0.25
