@@ -71,27 +71,6 @@ pause = pygame.transform.scale(pause,(80,30))
 logo = pygame.image.load("graphics/logo.png")
 
 
-
-
-
-class MAIN():
-    run = True
-    
-    def RUN(self):
-        while MAIN.run:
-            pass
-
-
-
-
-
-
-
-
-
-
-
-
 # game loop
 dt = 0
 pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, THROW_BALL])

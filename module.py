@@ -61,35 +61,36 @@ class TEXT():
 
 
 class TIMING_BAR():
-    timing, sign = 3, 0
-    color = "#32cd32"
-    x,y = screen_width-120,50
+    # class vairables
+    p = {"x":screen_width-220, "y":50}
+    s = {"w":210, "h":10}
+    txt_pos = [(screen_width-200,65),(screen_width-110,65),(screen_width-30,65)]
 
+    # displaying the timing bar
     def blit(self,target):
-        rect = pygame.Rect(screen_width-220,50,210,10)
-        pygame.draw.rect(target,"#343434",rect)
+        rect = pygame.Rect(TIMING_BAR.p["x"],TIMING_BAR.p["y"],TIMING_BAR.s["w"],TIMING_BAR.s["h"])
+        pygame.draw.rect(target,colors["hex"]["charcoal"],rect)
+        TEXT().blit("EARLY",target,TIMING_BAR.txt_pos[0],12,color=colors["rgb"]["white"])
+        TEXT().blit("PERFECT",target,TIMING_BAR.txt_pos[1],12,color=colors["rgb"]["white"])
+        TEXT().blit("LATE",target,TIMING_BAR.txt_pos[2],12,color=colors["rgb"]["white"])
 
-        rect = pygame.Rect(TIMING_BAR.x,TIMING_BAR.y,20,10)
-        pygame.draw.rect(target,TIMING_BAR.color,rect)
-        TEXT().blit("EARLY",target,(screen_width-200,65),12,color=(255,255,255))
-        TEXT().blit("PERFECT",target,(screen_width-110,65),12,color=(255,255,255))
-        TEXT().blit("LATE",target,(screen_width-30,65),12,color=(255,255,255))
-
-    def update(self,timing,sign=0):
-        TIMING_BAR.timing = timing
-        TIMING_BAR.sign = sign
-        if TIMING_BAR.timing == 3:
-            TIMING_BAR.color = "#32cd32"
-            TIMING_BAR.x,TIMING_BAR.y = screen_width-120,50
-        elif TIMING_BAR.timing == 2:
-            TIMING_BAR.color = "#ffd700"
-            TIMING_BAR.x,TIMING_BAR.y = screen_width-abs(TIMING_BAR.sign*240-150),50
-        elif TIMING_BAR.timing == 1:
-            TIMING_BAR.color = "#ff8c00"
-            TIMING_BAR.x,TIMING_BAR.y = screen_width-abs(TIMING_BAR.sign*250-180),50
+    # updating the timing
+    def update(self,target,timing,sign=0):
+        if timing == 3:
+            color = colors["hex"]["lime_green"]
+            x,y = screen_width-120,50
+        elif timing == 2:
+            color = colors["hex"]["yellow"]
+            x,y = screen_width-abs(sign*240-150),50
+        elif timing == 1:
+            color = colors["hex"]["dark_orange"]
+            x,y = screen_width-abs(sign*250-180),50
         else:
-            TIMING_BAR.color = "#b22222"
-            TIMING_BAR.x,TIMING_BAR.y = screen_width-abs(TIMING_BAR.sign*250-210),50
+            color = colors["hex"]["brick_red"]
+            x,y = screen_width-abs(sign*250-210),50
+
+        rect = pygame.Rect(x,y,20,10)
+        pygame.draw.rect(target,color,rect)
         
 
 
