@@ -55,7 +55,7 @@ class GAME():
 
         if BATSMAN.key_pressed:
             GAME.check_runs_scored()
-            GAME.all_sprites.sprites()[0].shot_select()
+            GAME.all_sprites.sprites()[0].play_shot()
             BALL.shot = BATSMAN.shot
             BALL.delivery_played = True
             BATSMAN.key_pressed = False
@@ -64,29 +64,31 @@ class GAME():
 
     def check_runs_scored():
         GAME.dr = BATSMAN.t_player_input-BOWLER.t_ball_released
-
+        print(GAME.dr)
         if BATSMAN.direction == BALL.direction:
 
-            if 40 <= GAME.dr <= 100:
+            if 310 <= GAME.dr <= 330:
                 GAME.runs_scored = 6
                 BATSMAN.shot = "loft"
             
-            elif 20 <= GAME.dr <= 120:
+            elif 310 <= GAME.dr <= 335:
                 GAME.runs_scored = "Catch-Out"
                 BATSMAN.shot = "loft"
 
-            elif 0 <= GAME.dr <= 140:
+            elif 310 <= GAME.dr <= 360:
                 GAME.runs_scored = 4
                 BATSMAN.shot = "stroke"
 
-            elif -200 <= GAME.dr <= 200:
+            elif 290 <= GAME.dr <= 395:
                 BATSMAN.shot = "stroke"
                 GAME.runs_scored = random.choice([1,1,1,2,2,3])
             
+            
             else: GAME.check_wicket()
 
-        else:
-            GAME.check_wicket() 
+        else: GAME.check_wicket() 
+
+        BALL.runs_scored = GAME.runs_scored
 
     def check_wicket():
 
@@ -98,7 +100,9 @@ class GAME():
                 GAME.runs_scored = 0
                 BALL.delivery_played = True
         
-        else: GAME.runs_scored = "Bowled"
+        else: 
+            GAME.runs_scored = "Bowled"
+            BATSMAN.shot = "stroke"
             
         
         

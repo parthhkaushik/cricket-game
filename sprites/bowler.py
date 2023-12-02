@@ -83,6 +83,7 @@ class BALL(pygame.sprite.Sprite):
     delivery_played = False
     shot="loft"
     direction = "straight"
+    runs_scored = 0
 
     def __init__(self):
         super().__init__()
@@ -91,7 +92,7 @@ class BALL(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom=ball_release_pt)
         BALL.rebound = False
         
-        self.points = [{"dx":(4.5,-0.5),"dy":(2,3),"length":210,"shot_dir":"straight"}]
+        self.points = [{"dx":(3.5,-0.5),"dy":(1,3),"length":222,"shot_dir":"straight"}]
         points = [
             {"dx":(4.5,-0.5),"dy":(2,3),"length":210,"shot_dir":"straight"},
             {"dx":(6,1),"dy":(1,6),"length":230,"shot_dir":"right"},
@@ -113,7 +114,13 @@ class BALL(pygame.sprite.Sprite):
 
         if BALL.delivery_played:
 
-            if self.rect.y <= hit_pos:
+            if BALL.runs_scored == "Bowled":
+                if self.rect.y <= 145:
+                    self.d = random.choice(self.points)
+                    BALL.delivery_played = False
+                    self.kill()
+
+            elif self.rect.y <= hit_pos:
                 self.d = random.choice(self.points)
                 BALL.delivery_played = False
                 self.kill()

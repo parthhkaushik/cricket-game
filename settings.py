@@ -19,7 +19,7 @@ ball_release_pt = (325,250)
 # shots
 shots = {
     "straight-loft":{"name":"lofted-straight","hit_pos":160},
-    "straight-stroke":{"name":"straight-drive","hit_pos":140},
+    "straight-stroke":{"name":"straight-drive","hit_pos":155},
     "left-loft":{"name":"reverse_sweep","hit_pos":140},
     "left-stroke":{"name":"cover-drive","hit_pos":145},
     "right-loft":{"name":"pull-shot","hit_pos":90},

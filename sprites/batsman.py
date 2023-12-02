@@ -63,9 +63,10 @@ class BATSMAN(pygame.sprite.Sprite):
     
     """
     """
-    def shot_select(self):
+    def play_shot(self):
         self.update_frames(BATSMAN.direction + "-" + BATSMAN.shot)
         self.animation_state = "shot" 
+        
             
     """
         get frames according to the animation playing
