@@ -2,14 +2,16 @@ import pygame
 from settings import *
 
 
-target_runs = 200
-current_runs = "100/2"
-current_overs = "5.1"
-
 # scoreboard
 
 class SCOREBOARD():
-    def display_score(self,target):
+
+    target_runs = 200
+    current_runs = "0/0"
+    current_overs = "0.0"
+    runs_in_over = []
+
+    def blit(self,target):
         scoreboard = pygame.Rect(0,screen_height-scoreboard_height,screen_width,scoreboard_height)
         pygame.draw.rect(target,"#343434",scoreboard)
         
@@ -23,6 +25,9 @@ class SCOREBOARD():
         for i in range(6):
             rect = pygame.Rect(600+i*32,screen_height-scoreboard_height+5,30,scoreboard_height-5)
             pygame.draw.rect(target,"#ff8c00",rect)
+        
+        TEXT().blit("     ".join(SCOREBOARD.runs_in_over),target,(615+16*(len(SCOREBOARD.runs_in_over)-1),screen_height-15),16,color=(255,255,255))
+        
 
         rect = pygame.Rect(screen_width-220,10,120,30)
         pygame.draw.rect(target,"#343434",rect)
@@ -30,14 +35,28 @@ class SCOREBOARD():
         # text 
         TEXT().blit("AUS",target,(35,screen_height-15),16,color=(255,255,255))
         TEXT().blit("VS",target,(80,screen_height-15),16,color=(255,255,255))
-        TEXT().blit(f"IND {current_runs}",target,(160,screen_height-15),16,color=(255,255,255))
-        TEXT().blit(current_overs,target,(240,screen_height-15),16,color=(255,255,255))
+        TEXT().blit(f"IND {SCOREBOARD.current_runs}",target,(160,screen_height-15),16,color=(255,255,255))
+        TEXT().blit(SCOREBOARD.current_overs,target,(240,screen_height-15),16,color=(255,255,255))
         TEXT().blit("10",target,(280,screen_height-15),16,color=(255,255,255))
-        TEXT().blit(f"TARGET : {target_runs}",target,(screen_width-160,25),16,color=(255,255,255))
+        TEXT().blit(f"TARGET : {SCOREBOARD.target_runs}",target,(screen_width-160,25),16,color=(255,255,255))
 
 
-    def update(self):
-        pass
+    def update(self, target, runs_scored):
+
+        # current runs
+        if runs_scored in ["Bowled","Catch-Out","Caught"]:
+            SCOREBOARD.current_runs = SCOREBOARD.current_runs[:-1]+str(int(SCOREBOARD.current_runs[-1])+1)
+            SCOREBOARD.runs_in_over.append("W")
+        else:
+            SCOREBOARD.current_runs = str(int(SCOREBOARD.current_runs[:-2])+runs_scored)+SCOREBOARD.current_runs[-2:]
+            SCOREBOARD.runs_in_over.append(str(runs_scored))
+
+        # over update
+        SCOREBOARD.current_overs = str(round(float(SCOREBOARD.current_overs)+0.1,1))
+        if SCOREBOARD.current_overs[-1] == "6":
+            SCOREBOARD.current_overs = str(round(float(SCOREBOARD.current_overs)))+".0"
+            SCOREBOARD.runs_in_over = []
+        
 
 
 
@@ -105,41 +124,6 @@ def get_frames(player,action,scale=None):
             c+=1
         except: break
     return frames
-
-
-def display_runs(runs,target):
-    """
-        Display the runs scored on that ball
-    """
-    rect1 = pygame.Rect(screen_width/2-100,screen_height/2-125,200,250)
-    pygame.draw.rect(target,"#343434",rect1)
-    rect2 = pygame.Rect(screen_width/2-100,screen_height/2-90,200,180)
-    pygame.draw.rect(target,"#B22222",rect2)
-
-    if runs == 0:
-        TEXT().blit("DOT",target,(screen_width/2,screen_height/2-30),50,"Action_Man")
-        TEXT().blit("BALL",target,(screen_width/2,screen_height/2+30),50,"Action_Man")
-    
-    elif  runs in ["Bowled","Catch-Out","Caught"]:
-        match runs:
-            case "Bowled":
-                TEXT().blit("BOWLED",target,(screen_width/2,screen_height/2),50,"Action_Man")
-            case "Catch-Out":
-                TEXT().blit("CATCH",target,(screen_width/2,screen_height/2-30),50,"Action_Man")
-                TEXT().blit("OUT",target,(screen_width/2,screen_height/2+30),50,"Action_Man")
-            case "Caught":
-                TEXT().blit("CAUGHT",target,(screen_width/2,screen_height/2),50,"Action_Man")
-
-    else:
-        match runs:
-            case 6: txt = "SIX"
-            case 4: txt = "FOUR"
-            case 3: txt = "TRIPLE"
-            case 2: txt = "DOUBLE"
-            case 1: txt = "SINGLE"
-        TEXT().blit(str(runs),target,(screen_width/2,screen_height/2-20),132)
-        TEXT().blit(txt,target,(screen_width/2,screen_height/2+60),50,"Action_Man")
-        
 
 
 class TIMING_BAR():
