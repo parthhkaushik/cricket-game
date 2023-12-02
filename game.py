@@ -8,15 +8,13 @@ from sprites.batsman import *
 from sprites.bowler import *
 from sprites.nonstriker import *
 
-# intialise pygame
-pygame.init()
-
 
 class GAME():
 
     # variables
     next_ball_event = False
     dt,dr = 0,0
+    total_overs = ""
     runs_scored = 0
     show_circle = False
     
@@ -63,7 +61,7 @@ class GAME():
         GAME.ball.update()
                 
         # displaying the sccoreboard
-        SCOREBOARD().blit(target) 
+        SCOREBOARD().blit(target, GAME.total_overs) 
 
         GAME.dt += 1
         if GAME.dt >= 420:
@@ -75,7 +73,7 @@ class GAME():
             BOWLER.next_ball_event = True
             NON_STRIKER.next_ball_event = True
             GAME.dt = 0
-            SCOREBOARD().update(target, GAME.runs_scored)
+            SCOREBOARD().update(GAME.runs_scored, GAME.total_overs)
             GAME.next_ball_event = False
             GAME.show_circle = False
 
@@ -88,6 +86,17 @@ class GAME():
                 
 
     """ methods """
+
+    def match_type(self, match_type):
+        if match_type == "exhibition":
+            GAME.total_overs = "1"
+            SCOREBOARD.target_runs = None
+        else:
+            GAME.total_overs = "10"
+            if match_type == "easy":
+                SCOREBOARD.target_runs = random.randint(75,199)
+            elif match_type == "hard":
+                SCOREBOARD.target_runs = random.randint(200,250)
 
     def check_runs_scored():
         GAME.dr = BATSMAN.t_player_input-BOWLER.t_ball_released

@@ -51,7 +51,7 @@ class BOWLER(pygame.sprite.Sprite):
             
             if self.frame_index >= len(self.frames)-1: 
                 
-                if self.t2 <= 300: self.t2 += 1
+                if self.t2 <= 240: self.t2 += 1
                 else:
                     pygame.event.post(pygame.event.Event(next_ball_event))
                     self.frame_index = 0

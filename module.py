@@ -6,12 +6,12 @@ from settings import *
 
 class SCOREBOARD():
 
-    target_runs = 200
+    target_runs = 1
     current_runs = "0/0"
     current_overs = "0.0"
     runs_in_over = []
 
-    def blit(self,target):
+    def blit(self,target,total_overs):
         scoreboard = pygame.Rect(0,screen_height-scoreboard_height,screen_width,scoreboard_height)
         pygame.draw.rect(target,"#343434",scoreboard)
         
@@ -37,16 +37,24 @@ class SCOREBOARD():
         TEXT().blit("VS",target,(80,screen_height-15),16,color=(255,255,255))
         TEXT().blit(f"IND {SCOREBOARD.current_runs}",target,(160,screen_height-15),16,color=(255,255,255))
         TEXT().blit(SCOREBOARD.current_overs,target,(240,screen_height-15),16,color=(255,255,255))
-        TEXT().blit("10",target,(280,screen_height-15),16,color=(255,255,255))
-        TEXT().blit(f"TARGET : {SCOREBOARD.target_runs}",target,(screen_width-160,25),16,color=(255,255,255))
+        TEXT().blit(total_overs,target,(280,screen_height-15),16,color=(255,255,255))
+        if SCOREBOARD.target_runs == None: txt = "NO TARGET"
+        else: txt = f"TARGET : {SCOREBOARD.target_runs}"
+        TEXT().blit(txt,target,(screen_width-160,25),16,color=(255,255,255))
 
 
-    def update(self, target, runs_scored):
+    def update(self, runs_scored, total_overs):
 
         # current runs
         if runs_scored in ["Bowled","Catch-Out","Caught"]:
             SCOREBOARD.current_runs = SCOREBOARD.current_runs[:-1]+str(int(SCOREBOARD.current_runs[-1])+1)
             SCOREBOARD.runs_in_over.append("W")
+            # loose conditin check
+            if SCOREBOARD.target_runs != None:
+                if int(SCOREBOARD.current_runs[-1]) == 10:
+                    pygame.event.post(pygame.event.Event(game_lost_event))
+                    update_stats(False)                
+
         else:
             SCOREBOARD.current_runs = str(int(SCOREBOARD.current_runs[:-2])+runs_scored)+SCOREBOARD.current_runs[-2:]
             SCOREBOARD.runs_in_over.append(str(runs_scored))
@@ -56,8 +64,19 @@ class SCOREBOARD():
         if SCOREBOARD.current_overs[-1] == "6":
             SCOREBOARD.current_overs = str(round(float(SCOREBOARD.current_overs)))+".0"
             SCOREBOARD.runs_in_over = []
+        SCOREBOARD.check_win_loss()
+    
+    def check_win_loss():
+        # win conditin check
+        if SCOREBOARD.target_runs != None:
+            if int(SCOREBOARD.current_runs[:-2]) > SCOREBOARD.target_runs:
+                pygame.event.post(pygame.event.Event(game_won_event))
+                update_stats(True)
+            elif SCOREBOARD.current_overs == "10.0" and int(SCOREBOARD.current_runs[:-2]) <= SCOREBOARD.target_runs:
+                pygame.event.post(pygame.event.Event(game_lost_event))
+        if SCOREBOARD.current_overs == "1.0":
+                update_hs(int(SCOREBOARD.current_runs[:-2]))
         
-
 
 
 # objects
@@ -124,6 +143,29 @@ def get_frames(player,action,scale=None):
             c+=1
         except: break
     return frames
+
+
+def update_stats(won):
+    with open("data/userdata.txt", "r+") as f:
+        line = f.readline()
+        f.seek(0)
+        f.write(f"TOTAL MATCHES PLAYED : {line.split()[4]+1}")
+        line = f.readline()
+        if won:
+            f.seek(0)
+            f.write(f"TOTAL WINS : {line.split()[3]+1}")
+
+def update_hs(runs):
+    with open("data/userdata.txt","r+") as f:
+        lines = f.readlines()
+        if runs >= int(lines[3].split()[4]):
+            lines[3] = f"EXHIBITION HIGH SCORE : {int(SCOREBOARD.current_runs[:-2])}"
+            f.seek(0)
+            f.writelines(lines)
+            pygame.event.post(pygame.event.Event(exhibition_event))
+        
+        
+
 
 
 class TIMING_BAR():

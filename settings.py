@@ -9,6 +9,7 @@ next_ball_event = USEREVENT +1
 throw_ball_event = USEREVENT +2
 game_won_event = USEREVENT +3
 game_lost_event = USEREVENT +4
+exhibition_event = USEREVENT +5
 
 # cricket pitch
 umpire_pos = (screen_width/2-35,340)
