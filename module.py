@@ -10,6 +10,7 @@ class SCOREBOARD():
     current_runs = "0/0"
     current_overs = "0.0"
     runs_in_over = []
+    six_count = 0
 
     def blit(self,target,total_overs):
         scoreboard = pygame.Rect(0,screen_height-scoreboard_height,screen_width,scoreboard_height)
@@ -28,7 +29,6 @@ class SCOREBOARD():
         
         TEXT().blit("     ".join(SCOREBOARD.runs_in_over),target,(615+16*(len(SCOREBOARD.runs_in_over)-1),screen_height-15),16,color=(255,255,255))
         
-
         rect = pygame.Rect(screen_width-220,10,120,30)
         pygame.draw.rect(target,"#343434",rect)
 
@@ -43,21 +43,18 @@ class SCOREBOARD():
         TEXT().blit(txt,target,(screen_width-160,25),16,color=(255,255,255))
 
 
-    def update(self, runs_scored, total_overs):
+    def update(self, runs_scored, six_count):
 
         # current runs
         if runs_scored in ["Bowled","Catch-Out","Caught"]:
             SCOREBOARD.current_runs = SCOREBOARD.current_runs[:-1]+str(int(SCOREBOARD.current_runs[-1])+1)
-            SCOREBOARD.runs_in_over.append("W")
-            # loose conditin check
-            if SCOREBOARD.target_runs != None:
-                if int(SCOREBOARD.current_runs[-1]) == 10:
-                    pygame.event.post(pygame.event.Event(game_lost_event))
-                    update_stats(False)                
+            SCOREBOARD.runs_in_over.append("W")               
 
         else:
             SCOREBOARD.current_runs = str(int(SCOREBOARD.current_runs[:-2])+runs_scored)+SCOREBOARD.current_runs[-2:]
             SCOREBOARD.runs_in_over.append(str(runs_scored))
+        
+        SCOREBOARD.six_count = six_count
 
         # over update
         SCOREBOARD.current_overs = str(round(float(SCOREBOARD.current_overs)+0.1,1))
@@ -67,17 +64,32 @@ class SCOREBOARD():
         SCOREBOARD.check_win_loss()
     
     def check_win_loss():
-        # win conditin check
+
         if SCOREBOARD.target_runs != None:
+
+            # win conditin check
             if int(SCOREBOARD.current_runs[:-2]) > SCOREBOARD.target_runs:
                 pygame.event.post(pygame.event.Event(game_won_event))
-                update_stats(True)
+                update_stats(won=True, six_count=SCOREBOARD.six_count)
+
+
+            # loose conditin check
             elif SCOREBOARD.current_overs == "10.0" and int(SCOREBOARD.current_runs[:-2]) <= SCOREBOARD.target_runs:
                 pygame.event.post(pygame.event.Event(game_lost_event))
-        if SCOREBOARD.current_overs == "1.0":
-                update_hs(int(SCOREBOARD.current_runs[:-2]))
-        
+                update_stats(won=False, six_count=SCOREBOARD.six_count)
 
+            elif SCOREBOARD.current_runs[len(SCOREBOARD.current_runs)-2:] == "10":
+                pygame.event.post(pygame.event.Event(game_lost_event))
+                update_stats(won=False, six_count=SCOREBOARD.six_count)
+            
+            
+
+        else:
+            if SCOREBOARD.current_overs == "5.0":
+                pygame.event.post(pygame.event.Event(exhibition_event))
+                update_hs(int(SCOREBOARD.current_runs[:-2]))
+                
+    
 
 # objects
 
@@ -145,27 +157,28 @@ def get_frames(player,action,scale=None):
     return frames
 
 
-def update_stats(won):
+def update_stats(won,six_count):
     with open("data/userdata.txt", "r+") as f:
-        line = f.readline()
+        lines = f.readlines()
+        for i in range(len(lines)):
+            if i == 0:
+                lines[i] = f"TOTAL MATCHES PLAYED : {int(lines[i].split()[4])+1}\n"
+            elif i == 1 and won:
+                lines[i] = f"TOTAL WINS : {int(lines[i].split()[3])+1}\n"
+            elif i == 3:
+                lines[i] = f"SIX COUNTER : {int(lines[i].split()[3])+six_count}\n"
         f.seek(0)
-        f.write(f"TOTAL MATCHES PLAYED : {line.split()[4]+1}")
-        line = f.readline()
-        if won:
-            f.seek(0)
-            f.write(f"TOTAL WINS : {line.split()[3]+1}")
+        f.writelines(lines)
+
 
 def update_hs(runs):
     with open("data/userdata.txt","r+") as f:
         lines = f.readlines()
-        if runs >= int(lines[3].split()[4]):
+        if runs >= int(lines[2].split()[4]):
             lines[3] = f"EXHIBITION HIGH SCORE : {int(SCOREBOARD.current_runs[:-2])}"
             f.seek(0)
             f.writelines(lines)
             pygame.event.post(pygame.event.Event(exhibition_event))
-        
-        
-
 
 
 class TIMING_BAR():

@@ -1,4 +1,5 @@
 import pygame
+from sys import exit
 from game import *
 
 # intialise pygame
@@ -48,12 +49,7 @@ class MAIN(object):
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
 
-                    if self.game_state == "pause":
-                        x, y = event.pos
-                        if screen.blit(GAME.pause,(screen_width-80-10,10)).collidepoint(x, y):
-                            MAIN.game_state = "pause"
-
-                    elif self.game_state == "home":
+                    if MAIN.game_state == "home":
                         x, y = event.pos
                         if screen.blit(self.menu1,(110,100)).collidepoint(x, y):
                             MAIN.game_state = "exhibition"
@@ -61,6 +57,12 @@ class MAIN(object):
                             MAIN.game_state = "easy"
                         elif screen.blit(self.menu3,(110,380)).collidepoint(x, y):
                             MAIN.game_state = "hard"
+                        
+                    elif MAIN.game_state in ["exhibition", "easy", "hard"]:
+                        x, y = event.pos
+                        if screen.blit(GAME.pause,(screen_width-80-10,10)).collidepoint(x, y):
+                            MAIN.old_game_state = MAIN.game_state
+                            MAIN.game_state = "pause"
 
 
                 if event.type == pygame.KEYDOWN:
@@ -69,7 +71,7 @@ class MAIN(object):
                         MAIN.game_state = "home"
 
                     elif event.key == pygame.K_SPACE and MAIN.game_state == "pause":
-                        MAIN.game_state = "game"
+                        MAIN.game_state = MAIN.old_game_state
 
 
                 if event.type == throw_ball_event:

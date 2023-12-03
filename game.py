@@ -17,6 +17,7 @@ class GAME():
     total_overs = ""
     runs_scored = 0
     show_circle = False
+    six_count = 0
     
     # images
     pitch = pygame.image.load('graphics/background.jpg')
@@ -73,7 +74,7 @@ class GAME():
             BOWLER.next_ball_event = True
             NON_STRIKER.next_ball_event = True
             GAME.dt = 0
-            SCOREBOARD().update(GAME.runs_scored, GAME.total_overs)
+            SCOREBOARD().update(GAME.runs_scored, GAME.six_count)
             GAME.next_ball_event = False
             GAME.show_circle = False
 
@@ -89,14 +90,14 @@ class GAME():
 
     def match_type(self, match_type):
         if match_type == "exhibition":
-            GAME.total_overs = "1"
+            GAME.total_overs = "5"
             SCOREBOARD.target_runs = None
         else:
             GAME.total_overs = "10"
             if match_type == "easy":
-                SCOREBOARD.target_runs = random.randint(75,199)
+                SCOREBOARD.target_runs = random.randint(75,120)
             elif match_type == "hard":
-                SCOREBOARD.target_runs = random.randint(200,250)
+                SCOREBOARD.target_runs = random.randint(190,250)
 
     def check_runs_scored():
         GAME.dr = BATSMAN.t_player_input-BOWLER.t_ball_released
@@ -107,6 +108,7 @@ class GAME():
             if 0 <= GAME.dr <= 400:
                 GAME.runs_scored = 6
                 BATSMAN.shot = "loft"
+                GAME.six_count += 1
 
             elif 0 <= GAME.dr <= 410:
                 GAME.runs_scored = "Catch-Out"
@@ -172,4 +174,3 @@ class GAME():
                 case 1: txt = "SINGLE"
             TEXT().blit(str(runs),target,(screen_width/2,screen_height/2-20),132)
             TEXT().blit(txt,target,(screen_width/2,screen_height/2+60),50,"Action_Man")
-            
