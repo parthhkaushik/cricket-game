@@ -2,6 +2,7 @@ import pygame, random
 from settings import *
 
 
+
 """ ball sprite """
 
 class BALL(pygame.sprite.Sprite):
@@ -25,7 +26,7 @@ class BALL(pygame.sprite.Sprite):
     def select_pos(self):
         self.points = [
             {"dx":(3.5,-0.5),"dy":(1,3),"length":222,"shot_dir":"straight", "circle_pos":(392,220)},
-            {"dx":(6,0),"dy":(1,3),"length":225,"shot_dir":"right", "circle_pos":(418,222)},
+            {"dx":(5,0.5),"dy":(1,3.5),"length":225,"shot_dir":"right", "circle_pos":(418,222)},
             {"dx":(3,-0.5),"dy":(1,3),"length":225,"shot_dir":"left", "circle_pos":(360,222)}
             ]
         BALL.point = random.choice(self.points)

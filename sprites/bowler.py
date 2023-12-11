@@ -1,5 +1,4 @@
 import pygame
-from module import get_frames
 from settings import *
 
 
