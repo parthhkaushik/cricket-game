@@ -56,7 +56,6 @@ class BOWLER(pygame.sprite.Sprite):
                     self.frame_index = 0
                     self.t1,self.t2 = 0,0
                     BOWLER.flag = 0
-                    BOWLER.next_ball_event = False
                 
             else: self.frame_index += 0.25
         

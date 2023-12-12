@@ -50,20 +50,27 @@ class BALL(pygame.sprite.Sprite):
                 if self.rect.y <= 145:
                     BALL.delivery_played = False
                     self.kill()
+                    sound = pygame.mixer.Sound('audio\\ball hitting bat.mp3')
+                    sound.set_volume(0.15)
+                    sound.play()
 
-            elif self.rect.y <= hit_pos:
+            elif self.rect.y <= hit_pos and BALL.runs_scored not in [0,"Bowled","Caught"]:
                 BALL.delivery_played = False
                 self.kill()
+                sound = pygame.mixer.Sound('audio\\ball hitting bat.mp3')
+                sound.set_volume(0.15)
+                sound.play()
 
             elif self.rect.y <= 0:
                 BALL.delivery_played = False
                 self.kill()
-        
+
         else:
             
-            if self.rect.y <= 140:
-                if BALL.direction == "straight":
+            if BALL.direction == "straight":
+                if self.rect.y <= 140:
                     self.kill()
+                    
 
     """ update sprite """
     def update(self): 

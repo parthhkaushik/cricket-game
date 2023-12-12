@@ -1,14 +1,10 @@
-import pygame, random
+import pygame
+
+# importing other files
+from game import *
 from settings import *
-from scoreboard import *
 
-# importing sprites
-from sprites.ball import *
-from sprites.batsman import *
-from sprites.bowler import *
-
-
-# intialise pygame
+# initialise pygame
 pygame.init()
 
 screen = pygame.display.set_mode((screen_width,screen_height))
@@ -16,325 +12,233 @@ clock = pygame.time.Clock()
 
 icon = pygame.image.load("graphics/logo.png")
 pygame.display.set_icon(icon)
-pygame.display.set_caption("Cricket 2023")
+pygame.display.set_caption("Cricket '23")
 
+# music
+music = pygame.mixer.Sound('audio\\music (My Type).mp3')
+music.set_volume(0.25)
+music_playing = False  
 
+# sounds
+crowd = pygame.mixer.Sound('audio\\crowd noise.mp3')
+crowd.set_volume(0.15)
+crowd_noise_playing = False
 
+# images
+start_img = pygame.image.load("graphics/start-screen.png")
+start_img = pygame.transform.scale(start_img,(screen_width,screen_height))
 
+menu1_bg = pygame.image.load("graphics/menu/bg1.png")
+menu1_bg = pygame.transform.scale(menu1_bg,(screen_width,screen_height))
 
-class Game():
+menu2_bg = pygame.image.load("graphics/menu/bg2.png")
+menu2_bg = pygame.transform.scale(menu2_bg,(screen_width,screen_height))
 
-    # variables
-    next_ball_event = False
-    dt,dr = 0,0
-    total_overs = ""
-    runs_scored = 0
-    show_circle = False
-    six_count = 0
-    
-    # images
-    pitch = pygame.image.load('graphics/background.jpg')
-    pitch = pygame.transform.scale(pitch,(screen_width,screen_height))
+button1 = pygame.transform.scale(pygame.image.load("graphics/menu/worldcup.png"),(373,128))
+button2 = pygame.transform.scale(pygame.image.load("graphics/menu/quickmatch.png"),(373,128))
+button3 = pygame.transform.scale(pygame.image.load("graphics/menu/practice.png"),(373,128))    
 
-    logo = pygame.image.load("graphics/cricket'23.png")
-    logo = pygame.transform.scale(logo,(180,30))
-    pause = pygame.image.load("graphics/pause.png")
-    pause = pygame.transform.scale(pause,(80,30))
+back = pygame.transform.scale(pygame.image.load("graphics/back.jpg"),(80,30))
+cont = pygame.transform.scale(pygame.image.load("graphics/continue.jpg"),(175,55))
+help = pygame.transform.scale(pygame.image.load("graphics/help.jpg"),(175,55))
+menu = pygame.transform.scale(pygame.image.load("graphics/quit.jpg"),(175,55))
 
-    umpire = pygame.image.load("graphics/umpire.png")
-    umpire = pygame.transform.scale(umpire,(80,215))
-    
-    wickets = pygame.image.load("graphics/wickets-1.png")
-    wickets = pygame.transform.scale(wickets,(64,80))
-
-    circle = pygame.image.load("graphics/target.png")
-    circle = pygame.transform.scale(circle,(30,15))
-
-    # sprites
-    all_sprites = pygame.sprite.Group()
-    all_sprites.add(BATSMAN(),NON_STRIKER(),BOWLER())
-    ball = pygame.sprite.GroupSingle()
-
-    def setup():
-        pass
-
-    def run(self, target):
-
-        target.blit(Game.pitch,(0,0))
-        target.blit(Game.wickets,(screen_width/2-25,105))
-
-        # other objects
-        target.blit(Game.pause,(screen_width-80-10,10))
-        blit_alpha(target, Game.logo, (10,10), 128)
-
-        # player and computer sprites
-        Game.all_sprites.draw(target)
-        for sprite in Game.all_sprites.sprites():
-            sprite.update()
-        target.blit(Game.umpire,umpire_pos)
+team1 = pygame.transform.scale(pygame.image.load("graphics/menu/win.png"),(373,128))
+team2 = pygame.transform.scale(pygame.image.load("graphics/menu/eng.png"),(373,128))
+team3 = pygame.transform.scale(pygame.image.load("graphics/menu/pak.png"),(373,128))
+team4 = pygame.transform.scale(pygame.image.load("graphics/menu/nz.png"),(373,128))
+team5 = pygame.transform.scale(pygame.image.load("graphics/menu/ind.png"),(373,128))
+team6 = pygame.transform.scale(pygame.image.load("graphics/menu/aus.png"),(373,128))
         
-        if Game.show_circle: target.blit(Game.circle,BALL.circle_pos)
+# variables
+dt = 0
+game_state = "start"
+match_type = None
+flag = 0
+team = None
 
-        Game.ball.draw(target)
-        Game.ball.update()
-                
-        # displaying the sccoreboard
-        SCOREBOARD().blit(target, Game.total_overs) 
+running = True
+pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN])
 
-        Game.dt += 1
-        if Game.dt >= 420:
-            if not BATSMAN.delivery_played: Game.check_wicket()
-            Game.display_runs(Game.runs_scored,target) 
 
-        if Game.next_ball_event:
-            BATSMAN.next_ball_event = True
-            BOWLER.next_ball_event = True
-            NON_STRIKER.next_ball_event = True
-            Game.dt = 0
-            SCOREBOARD().update(Game.runs_scored, Game.six_count)
-            Game.next_ball_event = False
-            Game.show_circle = False
+def check_events():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: 
+            global running, match_type, game_state, team
+            running = False
+        
+        # checking for events
+        if event.type == pygame.MOUSEBUTTONDOWN:
 
-        if BATSMAN.key_pressed:
-            Game.check_runs_scored()
-            Game.all_sprites.sprites()[0].play_shot()
-            BALL.shot = BATSMAN.shot
-            BALL.delivery_played = True
-            BATSMAN.key_pressed = False 
-                
-
-    """ methods """
-
-    def match_type(self, match_type):
-        if match_type == "exhibition":
-            Game.total_overs = "5"
-            SCOREBOARD.target_runs = None
-        else:
-            Game.total_overs = "10"
-            if match_type == "easy":
-                SCOREBOARD.target_runs = random.randint(75,120)
-            elif match_type == "hard":
-                SCOREBOARD.target_runs = random.randint(190,250)
-
-    def check_runs_scored():
-        Game.dr = BATSMAN.t_player_input-BOWLER.t_ball_released
-
-        # checking the player input
-        if BATSMAN.direction == BALL.direction:
-
-            if 100 <= Game.dr <= 400:
-                Game.runs_scored = 6
-                BATSMAN.shot = "loft"
-                Game.six_count += 1
-
-            elif 0 <= Game.dr <= 410:
-                Game.runs_scored = "Catch-Out"
-                BATSMAN.shot = "loft"
-
-            elif 0 <= Game.dr <= 475:
-                Game.runs_scored = 4
-                BATSMAN.shot = "stroke"
-
-            elif 0 <= Game.dr <= 550:
-                Game.runs_scored = random.choice([1,1,1,2,2,3])
-                BATSMAN.shot = "stroke"
+            if game_state == "menu1":
+                x, y = event.pos
+                if screen.blit(button2,(18,300)).collidepoint(x, y):
+                    game_state, match_type, team = "game", "quickmatch", "" 
+                elif screen.blit(button1,(18,154)).collidepoint(x, y):
+                    game_state = "menu2"
+                elif screen.blit(button3,(18,448)).collidepoint(x, y):
+                    game_state, match_type, team = "game", "practice", ""
             
-            else: Game.check_wicket()
-
-        else: Game.check_wicket() 
-        BALL.runs_scored = Game.runs_scored
-
-
-    def check_wicket():
-
-        if BALL.direction != "straight":
-
-            if -220 <= Game.dr <= 220 and BATSMAN.direction == BALL.direction:
-                Game.runs_scored = "Caught"
-            else: 
-                Game.runs_scored = 0
-                BALL.delivery_played = True
-        
-        else: 
-            Game.runs_scored = "Bowled"
-            BATSMAN.shot = "stroke"
-
-
-    def display_runs(runs,target):
-    
-        rect = pygame.Rect(screen_width/2-100,screen_height/2-125,200,250)
-        pygame.draw.rect(target,"#343434",rect)
-        rect = pygame.Rect(screen_width/2-100,screen_height/2-90,200,180)
-        pygame.draw.rect(target,"#B22222",rect)
-
-        # displaying text by checking the runs scored
-        if runs == 0:
-            TEXT().blit("DOT",target,(screen_width/2,screen_height/2-30),50,"Action_Man")
-            TEXT().blit("BALL",target,(screen_width/2,screen_height/2+30),50,"Action_Man")
-        
-        elif runs in ["Bowled","Catch-Out","Caught"]:
-            match runs:
-                case "Bowled":
-                    TEXT().blit("BOWLED",target,(screen_width/2,screen_height/2),50,"Action_Man")
-                case "Catch-Out":
-                    TEXT().blit("CATCH",target,(screen_width/2,screen_height/2-30),50,"Action_Man")
-                    TEXT().blit("OUT",target,(screen_width/2,screen_height/2+30),50,"Action_Man")
-                case "Caught":
-                    TEXT().blit("CAUGHT",target,(screen_width/2,screen_height/2),50,"Action_Man")
-
-        else:
-            match runs:
-                case 6: txt = "SIX"
-                case 4: txt = "FOUR"
-                case 3: txt = "TRIPLE"
-                case 2: txt = "DOUBLE"
-                case 1: txt = "SINGLE"
-            TEXT().blit(str(runs),target,(screen_width/2,screen_height/2-20),132)
-            TEXT().blit(txt,target,(screen_width/2,screen_height/2+60),50,"Action_Man")
-
-
-class Main(object):
-
-    def __init__(self):
-        self.running = True
-
-        self.img1 = pygame.image.load("graphics/start-screen.png")
-        self.img1 = pygame.transform.scale(self.img1,(screen_width,screen_height))
-
-        self.img2 = pygame.image.load("graphics/home-screen.png")
-        self.img2 = pygame.transform.scale(self.img2,(screen_width,screen_height))
-
-        self.menu1 = pygame.image.load("graphics/menu-1.png")
-        self.menu1 = pygame.transform.scale(self.menu1,(360,128))
-        self.menu2 = pygame.image.load("graphics/menu-2.png")
-        self.menu2 = pygame.transform.scale(self.menu2,(360,128))
-        self.menu3 = pygame.image.load("graphics/menu-3.png")
-        self.menu3 = pygame.transform.scale(self.menu3,(360,128))
-
-        self.bg_music = pygame.mixer.Sound('audio\My Type - Saint Motel.mp3')
-        self.bg_music.set_volume(0.25)
-        self.bg_music_playing = False
-        
-        
-        # variables
-        Main.dt = 0
-        Main.game_state = "start"
-        Main.match_type = None
-        Main.flag = 0
-
-    def run(self):
-        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN])
-        while self.running:
-
-            clock.tick(60)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-
-                    if Main.game_state == "home":
-                        x, y = event.pos
-                        if screen.blit(self.menu1,(18,154)).collidepoint(x, y):
-                            Main.match_type = "exhibition"
-                            Main.game_state = "game"
-                        elif screen.blit(self.menu2,(18,300)).collidepoint(x, y):
-                            Main.match_type = "easy"
-                            Main.game_state = "game"
-                        elif screen.blit(self.menu3,(18,448)).collidepoint(x, y):
-                            Main.match_type = "hard"
-                            Main.game_state = "game"
+            elif game_state == "menu2":
+                x, y = event.pos
+                if screen.blit(team1,(18,154)).collidepoint(x, y):
+                    game_state, match_type, team = "game", "very easy", "WIN"
+                elif screen.blit(team2,(410,154)).collidepoint(x, y):
+                    game_state, match_type, team = "game", "easy", "ENG"
+                elif screen.blit(team3,(18,300)).collidepoint(x, y):
+                    game_state, match_type, team = "game", "medium", "PAK"
+                elif screen.blit(team4,(410,300)).collidepoint(x, y):
+                    game_state, match_type, team = "game", "medium", "NZ"
+                elif screen.blit(team5,(18,448)).collidepoint(x, y):
+                    game_state, match_type, team = "game", "hard", "IND"
+                elif screen.blit(team6,(410,448)).collidepoint(x, y):
+                    game_state, match_type, team = "game", "very hard", "AUS"
+                
+                elif screen.blit(back, (screen_width-100, 88)).collidepoint(x, y):
+                    game_state = "menu1"
+                    
                         
-                    elif Main.game_state == "game":
-                        x, y = event.pos
-                        if screen.blit(Game.pause,(screen_width-80-10,10)).collidepoint(x, y):
-                            Main.game_state = "pause"
+            elif game_state == "game":
+                x, y = event.pos
+                if screen.blit(Game.pause,(screen_width-80-10,10)).collidepoint(x, y):
+                    game_state = "pause"
 
-
-                if event.type == pygame.KEYDOWN:
-
-                    if Main.game_state == "start" and not PROGRESS_BAR.loading: 
-                        Main.game_state = "home"
-
-                    elif event.key == pygame.K_SPACE and Main.game_state == "pause":
-                        Main.game_state = "game"
-
-
-                if event.type == throw_ball_event:
-                    BALL().select_pos() 
-                    Game.ball.add(BALL())
-                    NON_STRIKER.can_move = True
-                    Game.show_circle = True
-
-                if event.type == next_ball_event:
-                    Game.next_ball_event = True
-
-                if event.type == game_won_event:
-                    Main.game_state = "won"
-
-                elif event.type == game_lost_event:
-                    Main.game_state = "lost"
-
-                elif event.type == exhibition_event:
-                    Main.game_state = "end"
-
-            # main game
-            if Main.game_state == "game":
-
-                if self.bg_music_playing:
-                    self.bg_music.stop()
-                    self.bg_music_playing = False
-
-                if not Main.flag: 
-                    Game().match_type(Main.match_type)
-                    Main.flag = 1
-                self.music_paused = False
-                Game().run(screen)
-
-            elif Main.game_state == "pause":
-                # pause screen
-                img = pygame.image.load("graphics/pause-screen.png")
-                img = pygame.transform.scale(img,(screen_width,screen_height))
-                screen.blit(img,(0,0))
-                
-            elif Main.game_state == "start":
-                # start screen
-                screen.blit(self.img1,(0,0))
-
-                # message
-                PROGRESS_BAR().load(screen,(205,screen_height-50),(380,15))
-                if not PROGRESS_BAR.loading:
-                    message = "PRESS ANY KEY TO CONTINUE"
-                    pos = (screen_width/2,screen_height-50)
-                    TEXT().blit(message,screen,pos,bounce=True)  
-                    if not self.bg_music_playing:
-                        self.bg_music.play(loops=-1)
-                        self.bg_music_playing = True
-
-            elif Main.game_state == "home":
-                # start screen
-                screen.blit(self.img2,(0,0))
-                
-                # statistics
-                with open("data/userdata.txt","r") as f:
-                    lines = f.readlines()
-                    for i in range(len(lines)):
-                        pos = (screen_width-200,screen_height-160+30*i)
-                        TEXT().blit(lines[i],screen,pos,size=25,color=(255,255,255))
-
-                screen.blit(self.menu1,(18,154))
-                screen.blit(self.menu2,(18,300))
-                screen.blit(self.menu3,(18,448))
+            elif game_state == "pause":
+                x, y = event.pos
+                if screen.blit(cont, (160, 240)).collidepoint(x, y):
+                    game_state = "game"
+                elif screen.blit(help, (460, 240)).collidepoint(x, y):
+                    game_state = "help"
+                elif screen.blit(menu, (160, 340)).collidepoint(x, y):
+                    game_state = "menu1"
+                    global flag, crowd_noise_playing, music_playing
+                    flag = 0
+                    crowd.stop()
+                    crowd_noise_playing = False
+                    music.play(loops=-1)
+                    music_playing = True
+                    Game.all_sprites.empty()
+                    Game.ball.empty()
             
-            else:
-                img = pygame.image.load(f"graphics/{Main.game_state}.png")
-                img = pygame.transform.scale(img,(screen_width,screen_height))
-                screen.blit(img,(0,0))
+            elif game_state == "help":
+                x, y = event.pos
+                if screen.blit(back,(screen_width-80-30,screen_height-50)).collidepoint(x, y):
+                    game_state = "pause"
+            
+        elif event.type == pygame.KEYDOWN:
+            if game_state == "start" and not PROGRESS_BAR.loading: game_state = "menu1"
+                    
+        
+        # checking for userevents
+        if event.type == throw_ball_event:
+            BALL().select_pos() 
+            Game.ball.add(BALL())
+            NON_STRIKER.can_move = True
+            Game.show_circle = True
+
+        elif event.type == next_ball_event:
+            Game.next_ball_event = True
+            crowd.set_volume(0.15)
+
+        elif event.type == game_won_event:
+            game_state = "won"
+
+        elif event.type == game_lost_event:
+            game_state = "lost"
+
+        elif event.type == quickmatch_event:
+            game_state = "end"
+
+
+# main game loop
+while running:
+    check_events()
+
+    # main game
+    if game_state == "game":
+
+        if Game.runs_scored != 0 and BALL.delivery_played:
+            crowd.set_volume(0.4)
+
+        if music_playing:
+            music.stop()
+            music_playing = False
+
+        if not crowd_noise_playing:
+            crowd.play(loops=-1)
+            crowd_noise_playing = True
+
+        if not flag: 
+            Game().setup()
+            Game().match_type(match_type, team)
+            flag = 1
+        Game().run(screen)
+
+    elif game_state == "pause":
+        # pause screen
+        img = pygame.image.load("graphics/pause-screen.png")
+        img = pygame.transform.scale(img,(screen_width,screen_height))
+        screen.blit(img,(0,0))
+
+        screen.blit(cont, (160, 240))
+        screen.blit(help, (460, 240))
+        screen.blit(menu, (160, 340))
+    
+    elif game_state == "help":
+        # pause screen
+        img = pygame.image.load("graphics/help-screen.png")
+        img = pygame.transform.scale(img,(screen_width,screen_height))
+        screen.blit(img,(0,0))
+        screen.blit(back, (screen_width-80-30, screen_height-50))
                 
+    elif game_state == "start":
+        # start screen
+        screen.blit(start_img,(0,0))
 
+        # message
+        PROGRESS_BAR().load(screen,(205,screen_height-50),(380,15))
+        if not PROGRESS_BAR.loading:
+            message = "PRESS ANY KEY TO CONTINUE"
+            pos = (screen_width/2,screen_height-50)
+            TEXT().blit(message,screen,pos,bounce=True)  
+            if not music_playing:
+                music.play(loops=-1)
+                music_playing = True
 
-            # updating display
-            pygame.display.update()
+    elif game_state == "menu1":
+        # start screen
+        screen.blit(menu1_bg,(0,0))
+                
+        # statistics
+        with open("data/userdata.txt","r") as f:
+            lines = f.readlines()
+            for i in range(len(lines)):
+                pos = (screen_width-200,screen_height-160+30*i)
+                TEXT().blit(lines[i],screen,pos,size=24,color=(255,255,255))
 
-Main().run()
-pygame.quit()
+        screen.blit(button1,(18,154))
+        screen.blit(button2,(18,300))
+        screen.blit(button3,(18,448))
+    
+    elif game_state == "menu2":
+        # start screen
+        screen.blit(menu2_bg,(0,0))
+        screen.blit(back, (screen_width-100, 88))
+
+        screen.blit(team1,(18,154))
+        screen.blit(team3,(18,300))
+        screen.blit(team5,(18,448))
+
+        screen.blit(team2,(410,154))
+        screen.blit(team4,(410,300))
+        screen.blit(team6,(410,448))
+
+    else:
+        img = pygame.image.load(f"graphics/{game_state}.png")
+        img = pygame.transform.scale(img,(screen_width,screen_height))
+        screen.blit(img,(0,0))
+                
+    # 60 frames per second
+    clock.tick(60)
+    # updating display
+    pygame.display.update()
