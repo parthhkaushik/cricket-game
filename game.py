@@ -106,7 +106,7 @@ class Game():
 
     logo = pygame.image.load("graphics/cricket'23.png")
     logo = pygame.transform.scale(logo,(180,30))
-    pause = pygame.image.load("graphics/pause.png")
+    pause = pygame.image.load("graphics/buttons/pause.png")
     pause = pygame.transform.scale(pause,(80,30))
 
     umpire = pygame.image.load("graphics/umpire.png")
