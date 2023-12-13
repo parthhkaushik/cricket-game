@@ -79,13 +79,13 @@ class SCOREBOARD():
             SCOREBOARD.current_overs = str(round(float(SCOREBOARD.current_overs)))+".0"
             SCOREBOARD.runs_in_over = []
         SCOREBOARD.balls_left -= 1
-        SCOREBOARD.runs_left -= runs_scored
+        if runs_scored in [1,2,3,4,6]: SCOREBOARD.runs_left -= runs_scored
         SCOREBOARD.check_win_loss()
     
     def check_win_loss():
         if SCOREBOARD.target_runs != None:
             # win conditin check
-            if int(SCOREBOARD.current_runs[:-2]) > SCOREBOARD.target_runs:
+            if int(SCOREBOARD.current_runs[:-2]) >= SCOREBOARD.target_runs:
                 pygame.event.post(pygame.event.Event(game_won_event))
                 update_stats(won=True, six_count=SCOREBOARD.six_count)
 
