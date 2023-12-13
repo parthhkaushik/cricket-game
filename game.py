@@ -14,6 +14,8 @@ class SCOREBOARD():
     current_overs = "0.0"
     runs_in_over = []
     six_count = 0
+    balls_left = 60
+    runs_left = 0
 
     def blit(self,target,total_overs,team):
         scoreboard = pygame.Rect(0,screen_height-scoreboard_height,screen_width,scoreboard_height)
@@ -39,15 +41,25 @@ class SCOREBOARD():
         pygame.draw.rect(target,"#343434",rect)
 
         # text 
-        TEXT().blit(team,target,(35,screen_height-15),16,color=(255,255,255))
         TEXT().blit("VS",target,(80,screen_height-15),16,color=(255,255,255))
-        s = f"TEAM {SCOREBOARD.current_runs}"
+        s = f"ALL {SCOREBOARD.current_runs}"
         TEXT().blit(s,target,(160,screen_height-15),16,color=(255,255,255))
         TEXT().blit(SCOREBOARD.current_overs,target,(240,screen_height-15),16,color=(255,255,255))
         TEXT().blit(total_overs,target,(280,screen_height-15),16,color=(255,255,255))
-        if SCOREBOARD.target_runs == None: txt = "NO TARGET"
-        else: txt = f"TARGET : {SCOREBOARD.target_runs}"
-        TEXT().blit(txt,target,(screen_width-160,25),16,color=(255,255,255))
+        if SCOREBOARD.target_runs == None: 
+            TEXT().blit("OPP",target,(35,screen_height-15),16,color=(255,255,255))
+            txt1 = "NO TARGET"
+            with open("data/userdata.txt","r") as f:
+                lines = f.readlines()
+                txt2 = "YOUR PREVIOUS HIGHSCORE IS " + lines[2].split()[4]
+        else: 
+            txt1 = f"TARGET : {SCOREBOARD.target_runs}"
+            txt2 = "NEED " + str(SCOREBOARD.runs_left) + " RUNS OFF " + str(SCOREBOARD.balls_left) + " BALLS"
+            TEXT().blit(team,target,(35,screen_height-15),16,color=(255,255,255))
+
+        TEXT().blit(txt1,target,(screen_width-160,25),16,color=(255,255,255))
+        TEXT().blit(txt2,target,(450,screen_height-15),16,color=(255,255,255))
+        
 
 
     def update(self, runs_scored, six_count):
@@ -66,6 +78,8 @@ class SCOREBOARD():
         if SCOREBOARD.current_overs[-1] == "6":
             SCOREBOARD.current_overs = str(round(float(SCOREBOARD.current_overs)))+".0"
             SCOREBOARD.runs_in_over = []
+        SCOREBOARD.balls_left -= 1
+        SCOREBOARD.runs_left -= runs_scored
         SCOREBOARD.check_win_loss()
     
     def check_win_loss():
@@ -145,6 +159,8 @@ class Game():
         SCOREBOARD.current_overs = "0.0"
         SCOREBOARD.runs_in_over = []
         SCOREBOARD.six_count = 0
+        SCOREBOARD.balls_left = 60
+        SCOREBOARD.runs_left = 0
 
         # Batsman
         NON_STRIKER.next_ball_event = True
@@ -242,6 +258,7 @@ class Game():
                 SCOREBOARD.target_runs = random.randint(150,199)
             elif match_type == "very hard":
                 SCOREBOARD.target_runs = random.randint(200,250)
+            SCOREBOARD.runs_left = SCOREBOARD.target_runs
 
 
     def check_runs_scored():

@@ -63,6 +63,19 @@ match_type = None
 flag = 0
 team = None
 
+def return_to_menu():
+    global game_state
+    game_state = "menu1"
+    global flag, crowd_noise_playing, music_playing
+    flag = 0
+    crowd.stop()
+    crowd_noise_playing = False
+    music.play(loops=-1)
+    music_playing = True
+    Game.all_sprites.empty()
+    Game.ball.empty()
+    
+
 running = True
 pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN])
 
@@ -79,11 +92,11 @@ def check_events():
             if game_state == "menu1":
                 x, y = event.pos
                 if screen.blit(button2,(18,300)).collidepoint(x, y):
-                    game_state, match_type, team = "wait", "quickmatch", "" 
+                    game_state, match_type, team = "wait", "quickmatch", "OPP" 
                 elif screen.blit(button1,(18,154)).collidepoint(x, y):
                     game_state = "menu2"
                 elif screen.blit(button3,(18,448)).collidepoint(x, y):
-                    game_state, match_type, team = "wait", "practice", ""
+                    game_state, match_type, team = "wait", "practice", "OPP"
             
                 elif screen.blit(exit, (screen_width-100, 88)).collidepoint(x, y):
                     running = False
@@ -119,15 +132,7 @@ def check_events():
                 elif screen.blit(help, (460, 240)).collidepoint(x, y):
                     game_state = "help"
                 elif screen.blit(menu, (160, 340)).collidepoint(x, y):
-                    game_state = "menu1"
-                    global flag, crowd_noise_playing, music_playing
-                    flag = 0
-                    crowd.stop()
-                    crowd_noise_playing = False
-                    music.play(loops=-1)
-                    music_playing = True
-                    Game.all_sprites.empty()
-                    Game.ball.empty()
+                    return_to_menu()
             
             elif game_state == "help":
                 x, y = event.pos
@@ -137,7 +142,8 @@ def check_events():
         elif event.type == pygame.KEYDOWN:
             if game_state == "start" and not PROGRESS_BAR.loading: game_state = "menu1"
             elif game_state == "wait" and not PROGRESS_BAR.loading: game_state = "game"
-            elif game_state in ["end","won","lost"] and not PROGRESS_BAR.loading: game_state = "menu1"
+            elif game_state in ["end","won","lost"] and not PROGRESS_BAR.loading: 
+                return_to_menu()
                     
         
         # checking for userevents
@@ -166,7 +172,21 @@ while running:
     check_events()
 
     # main game
-    if game_state == "game":
+    if game_state == "start":
+        # start screen
+        screen.blit(start_img,(0,0))
+
+        # message
+        PROGRESS_BAR().load(screen,(205,screen_height-50),(380,15))
+        if not PROGRESS_BAR.loading:
+            message = "PRESS ANY KEY TO CONTINUE"
+            pos = (screen_width/2,screen_height-50)
+            TEXT().blit(message,screen,pos,bounce=True)  
+            if not music_playing:
+                music.play(loops=-1)
+                music_playing = True
+                
+    elif game_state == "game":
 
         if Game.runs_scored != 0 and BALL.delivery_played:
             crowd.set_volume(0.4)
@@ -190,40 +210,6 @@ while running:
         screen.blit(cont, (160, 240))
         screen.blit(help, (460, 240))
         screen.blit(menu, (160, 340))
-    
-    elif game_state == "help":
-        # pause screen
-        screen.blit(help_img,(0,0))
-        screen.blit(back, (screen_width-80-30, screen_height-50))
-                
-    elif game_state == "start":
-        # start screen
-        screen.blit(start_img,(0,0))
-
-        # message
-        PROGRESS_BAR().load(screen,(205,screen_height-50),(380,15))
-        if not PROGRESS_BAR.loading:
-            message = "PRESS ANY KEY TO CONTINUE"
-            pos = (screen_width/2,screen_height-50)
-            TEXT().blit(message,screen,pos,bounce=True)  
-            if not music_playing:
-                music.play(loops=-1)
-                music_playing = True
-
-    elif game_state == "wait":
-        # start screen
-
-        screen.blit(help_img,(0,0))
-
-        # message
-        message = "PRESS ANY KEY TO CONTINUE"
-        pos = (screen_width/2,screen_height-50)
-        TEXT().blit(message,screen,pos,bounce=True)  
-
-        if music_playing:
-            music.stop()
-            music_playing = False
-
 
     elif game_state == "menu1":
         # start screen
@@ -253,6 +239,25 @@ while running:
         screen.blit(team2,(410,154))
         screen.blit(team4,(410,300))
         screen.blit(team6,(410,448))
+
+    elif game_state == "help":
+        # pause screen
+        screen.blit(help_img,(0,0))
+        screen.blit(back, (screen_width-80-30, screen_height-50))
+
+    elif game_state == "wait":
+        # start screen
+
+        screen.blit(help_img,(0,0))
+
+        # message
+        message = "PRESS ANY KEY TO CONTINUE"
+        pos = (screen_width/2,screen_height-50)
+        TEXT().blit(message,screen,pos,bounce=True)  
+
+        if music_playing:
+            music.stop()
+            music_playing = False
 
     else:
         img = pygame.image.load(f"graphics/bg/{game_state}.png")
