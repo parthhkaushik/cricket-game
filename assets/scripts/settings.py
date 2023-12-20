@@ -1,4 +1,4 @@
-import pygame
+import pygame,csv
 
 # display
 screen_width, screen_height = 800, 600
@@ -85,7 +85,7 @@ def update_stats(won,six_count):
             elif i == 1 and won:
                 lines[i] = f"TOTAL WINS : {int(lines[i].split()[3])+1}\n"
             elif i == 3:
-                lines[i] = f"SIX COUNTER : {int(lines[i].split()[3])+six_count}\n"
+                lines[i] = f"SIX COUNTER : {int(lines[i].split()[3])+six_count}"
         f.seek(0)
         f.writelines(lines)
 
@@ -101,7 +101,34 @@ def update_hs(runs):
             f.seek(0)
             f.writelines(lines)
             pygame.event.post(pygame.event.Event(quickmatch_event))
-      
+
+
+def get_scorecard(file):
+    scorecard = []
+    with open(file,"r",newline="") as f:
+        lines = csv.reader(f)
+        for line in lines:
+            # player, runs, balls, 6s, status
+            c = [line[0],0,0,0,"NOT-OUT"]
+            scorecard.append(c)
+    return scorecard
+
+
+def next_batsman(file,out=0):
+    with open(file,"r",newline="") as f:
+        lines = csv.reader(f)
+        c = 0
+        if out == 0:
+            openers = []
+            for line in lines:
+                openers.append(line)
+                if c == 1: return openers
+                c+=1
+        for line in lines:
+            if c-out == 1: return line
+            c+=1
+
+
 
 # shots
 shots = {
@@ -139,7 +166,7 @@ ball_points = [
 # objects
 class TEXT():
     ds, sign = 0, 1
-    def blit(self,text,target,pos,size=20,font="Aller",bold=False,color=(0,0,0),bounce=False):
+    def blit(self,text,target,pos,size=20,font="Aller",bold=False,color=(0,0,0),bounce=False,align="center"):
         if bounce:
             if TEXT.ds >= 2.75: TEXT.sign = -1
             elif TEXT.ds == 0: TEXT.sign = 1
@@ -149,7 +176,9 @@ class TEXT():
         else:
             font = pygame.font.Font(f"assets/fonts/{font}-Regular.ttf",(size+int(TEXT.ds)))
         txt = font.render(text,False,color)
-        txt_rect = txt.get_rect(center = pos)
+        if align == "center": txt_rect = txt.get_rect(center = pos)
+        elif align == "right": txt_rect = txt.get_rect(midright = pos)
+        else: txt_rect = txt.get_rect(midleft=pos)
         target.blit(txt,txt_rect)
     
 class PROGRESS_BAR():

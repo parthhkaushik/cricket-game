@@ -22,6 +22,7 @@ game_state = "start"
 match_type = None
 flag = 0
 team = None
+match_result = None
 
 # functions
 def return_to_mainmenu():
@@ -53,7 +54,10 @@ pause_bg = pygame.image.load("assets/images/background/pause-screen.png").conver
 pause_bg = pygame.transform.scale(pause_bg,(screen_width,screen_height))
 
 help_bg = pygame.image.load("assets/images/background/help-screen.png").convert()
-help_bg = pygame.transform.scale(help_bg,(screen_width,screen_height))    
+help_bg = pygame.transform.scale(help_bg,(screen_width,screen_height))   
+
+scorecard_bg = pygame.image.load("assets/images/background/scorecard.png").convert()
+scorecard_bg = pygame.transform.scale(scorecard_bg,(screen_width,screen_height))   
 
 # buttons images
 exit_img = pygame.image.load("assets/images/buttons/exit.jpg").convert()
@@ -66,6 +70,8 @@ help_img = pygame.image.load("assets/images/buttons/help.jpg").convert()
 help_img = pygame.transform.scale(help_img,(175,55))
 menu_img = pygame.image.load("assets/images/buttons/quit.jpg").convert()
 menu_img = pygame.transform.scale(menu_img,(175,55))
+scorecard_img = pygame.image.load("assets/images/buttons/scorecard.png").convert()
+scorecard_img = pygame.transform.scale(scorecard_img,(175,55))
  
 # sounds
 crowd = pygame.mixer.Sound('assets/audio/crowd noise.mp3')
@@ -104,7 +110,7 @@ team6 = pygame.transform.scale(team6,(373,128))
 pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN])
 def check_events():
     for event in pygame.event.get():
-        global running, match_type, game_state, team
+        global running, match_type, game_state, team, match_result
         if event.type == pygame.QUIT: running = False
         
         # checking for userevents
@@ -120,13 +126,16 @@ def check_events():
             crowd.set_volume(0.15)
 
         elif event.type == game_won_event: 
-            game_state = "won"
+            game_state = "break"
+            match_result = "won"
 
         elif event.type == game_lost_event: 
-            game_state = "lost"
+            game_state = "break"
+            match_result = "lost"
 
         elif event.type == quickmatch_event: 
-            game_state = "end"
+            game_state = "break"
+            match_result = "end"
 
 
         # checking for a button click
@@ -185,13 +194,22 @@ def check_events():
                 # pause screen buttons
                 if screen.blit(cont_img, (160, 240)).collidepoint(x, y):
                     game_state = "game"
-                elif screen.blit(help_img, (460, 240)).collidepoint(x, y):
+                elif screen.blit(help_img, (160, 340)).collidepoint(x, y):
                     game_state = "help"
-                elif screen.blit(menu_img, (160, 340)).collidepoint(x, y):
+                elif screen.blit(scorecard_img, (460, 240)).collidepoint(x, y):
+                    game_state = "scorecard"
+                elif screen.blit(menu_img, (460, 340)).collidepoint(x, y):
                     return_to_mainmenu()
             
             # if the help/controls screen is open
             elif game_state == "help":
+                x, y = event.pos
+
+                # back button
+                if screen.blit(back_img,(screen_width-80-30,screen_height-50)).collidepoint(x, y):
+                    game_state = "pause"
+                
+            elif game_state == "scorecard":
                 x, y = event.pos
 
                 # back button
@@ -208,6 +226,10 @@ def check_events():
             
             # wait screen (help screen)
             elif game_state == "wait": game_state = "game"
+
+            # scorecard (after match is over)
+            elif game_state == "break": 
+                game_state = match_result
 
             # results screen
             elif game_state in ["end","won","lost"]: return_to_mainmenu()
@@ -306,8 +328,38 @@ while running:
     elif game_state == "pause":
         screen.blit(pause_bg,(0,0))
         screen.blit(cont_img, (160, 240))
-        screen.blit(help_img, (460, 240))
-        screen.blit(menu_img, (160, 340))
+        screen.blit(scorecard_img, (460, 240))
+        screen.blit(help_img, (160, 340))
+        screen.blit(menu_img, (460, 340))
+
+    # if the scorecard is open
+    elif game_state == "scorecard" or game_state == "break":
+        screen.blit(scorecard_bg,(0,0))
+
+        if game_state == "scorecard":
+            screen.blit(back_img, (screen_width-80-30, screen_height-50))
+        else:
+            # message
+            message = "PRESS ANY KEY TO CONTINUE"
+            pos = (screen_width/2,screen_height-50)
+            TEXT().blit(message,screen,pos)
+
+        for i in range(len(Game.scorecard)-1):
+            TEXT().blit(Game.scorecard[i][0],screen,(100,240+24*i),size=16,color=(255,255,255),align="left") 
+            if str(Game.scorecard[i][2]) == "0": continue
+            pos = (screen_width-250,240+24*i)
+            TEXT().blit(str(Game.scorecard[i][1]),screen,pos,size=16,color=(255,255,255))    
+            pos = (screen_width-175,240+24*i)
+            TEXT().blit(str(Game.scorecard[i][2]),screen,pos,size=16,color=(255,255,255))    
+            pos = (screen_width-105,240+24*i)
+            TEXT().blit(str(Game.scorecard[i][3]),screen,pos,size=16,color=(255,255,255)) 
+            pos = (screen_width-290,240+24*i)
+            TEXT().blit(str(Game.scorecard[i][4]),screen,pos,size=16,color=(255,255,255),align="right")
+
+        pos = (screen_width-160,screen_height-98)
+        TEXT().blit(Scoreboard.current_runs,screen,pos,20,color=(255,255,255))
+        pos = (screen_width-270,screen_height-98)
+        TEXT().blit(Scoreboard.current_overs,screen,pos,20,color=(255,255,255))
 
 
     # if the help/controls screen is open
@@ -315,12 +367,12 @@ while running:
         screen.blit(help_bg,(0,0))
         screen.blit(back_img, (screen_width-80-30, screen_height-50))
 
-
-    # if any of the results screen is open
+    
     else:
-        img = pygame.image.load(f"assets/images/background/{game_state}.png")
+        img = pygame.image.load(f"assets/images/background/{game_state}.png").convert()
         img = pygame.transform.scale(img,(screen_width,screen_height))
         screen.blit(img,(0,0))
+
         # message
         message = "PRESS ANY KEY TO CONTINUE"
         pos = (screen_width/2,screen_height-50)

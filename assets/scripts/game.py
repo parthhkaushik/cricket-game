@@ -13,7 +13,9 @@ class Scoreboard():
     current_runs, current_overs = "0/0", "0.0"
     runs_in_over = []
     six_count, balls_left = 0, 60
-    txt1, txt2 = "", ""
+    txt1 = ""
+    current_batsmen = [1,2]
+    batsman_on_strike = 0
 
 
     # methods 
@@ -48,33 +50,65 @@ class Scoreboard():
         TEXT().blit(total_overs,target,(190,screen_height-15),16,color=(255,255,255))
 
         TEXT().blit(Scoreboard.txt1,target,(screen_width-160,25),16,color=(255,255,255))
-        TEXT().blit(Scoreboard.txt2,target,(400,screen_height-15),16,color=(255,255,255))
         
+        batsman1_runs = Game.scorecard[Scoreboard.current_batsmen[0]-1][1]
+        batsman1_balls = Game.scorecard[Scoreboard.current_batsmen[0]-1][2]
+        batsman1 = f"{Game.batsman1[0]} {batsman1_runs} ({batsman1_balls})" 
+        TEXT().blit(batsman1,target,(320,screen_height-15),16,color=(255,255,255))
 
-    def update(self, match_type, runs_scored, six_count):
+        batsman2_runs = Game.scorecard[Scoreboard.current_batsmen[1]-1][1]
+        batsman2_balls = Game.scorecard[Scoreboard.current_batsmen[1]-1][2]
+        batsman2 = f"{Game.batsman2[0]} {batsman2_runs} ({batsman2_balls})"
+        TEXT().blit(batsman2,target,(480,screen_height-15),16,color=(255,255,255))
+
+
+    def update(self, runs_scored):
         """ update the screoboard """
+
+        # balls played
+        Game.scorecard[Scoreboard.current_batsmen[Scoreboard.batsman_on_strike]-1][2] += 1
 
         # current runs
         if runs_scored in ["Bowled","Catch-Out","Caught"]:
             Scoreboard.current_runs = Scoreboard.current_runs[:-1]+str(int(Scoreboard.current_runs[-1])+1)
-            Scoreboard.runs_in_over.append("W")               
+            Scoreboard.runs_in_over.append("W")
+            Game.scorecard[Scoreboard.current_batsmen[Scoreboard.batsman_on_strike]-1][4] = runs_scored.upper()
+
+            # change the batsman on strike   
+            file = "assets/data/players.csv"
+            out = int(Scoreboard.current_runs[-1])
+            if Scoreboard.batsman_on_strike == 0:
+                Game.batsman1 = next_batsman(file,out)
+                Scoreboard.current_batsmen[0] = out+2
+            else:
+                Game.batsman2 = next_batsman(file,out)
+                Scoreboard.current_batsmen[1] = out+2
         else:
             Scoreboard.current_runs = str(int(Scoreboard.current_runs[:-2])+runs_scored)+Scoreboard.current_runs[-2:]
             Scoreboard.runs_in_over.append(str(runs_scored))
-        
-        Scoreboard.six_count = six_count
+
+            Scoreboard.runs_left -= runs_scored
+            Game.scorecard[Scoreboard.current_batsmen[Scoreboard.batsman_on_strike]-1][1] += runs_scored
+
+            if runs_scored in [1,3]:
+                if Scoreboard.batsman_on_strike == 0:
+                    Scoreboard.batsman_on_strike = 1
+                else:
+                    Scoreboard.batsman_on_strike = 0
     
         # over update
         Scoreboard.current_overs = str(round(float(Scoreboard.current_overs)+0.1,1))
+        Scoreboard.balls_left -= 1            
+
+        # check over completed
         if Scoreboard.current_overs[-1] == "6":
             Scoreboard.current_overs = str(round(float(Scoreboard.current_overs)))+".0"
             Scoreboard.runs_in_over = []
-        Scoreboard.balls_left -= 1
-        if runs_scored in [1,2,3,4,6]: Scoreboard.runs_left -= runs_scored
+            if Scoreboard.batsman_on_strike == 0:
+                Scoreboard.batsman_on_strike = 1
+            else:
+                Scoreboard.batsman_on_strike = 0
 
-        if match_type != "quickmatch":
-            Scoreboard.txt2 = f"NEED {str(Scoreboard.runs_left)} RUNS OFF {str(Scoreboard.balls_left)} BALLS"
-        
         # checking for win or loss
         ch = check_win_loss(Scoreboard.target_runs,Scoreboard.current_runs, Scoreboard.current_overs, Game.matchtype)
         
@@ -98,8 +132,10 @@ class Game():
     dt,dr = 0,0
     total_overs, runs_scored = "", 0
     show_circle = False
-    six_count, team = 0, None
+    team = 0, None
     sound_playing = False
+    batsman1, batsman2 = "",""
+    scorecard = []
 
     # images
     pitch = pygame.image.load('assets/images/ground/background.jpg')
@@ -133,9 +169,9 @@ class Game():
         Game.total_overs = ""
         Game.runs_scored = 0
         Game.show_circle = False
-        Game.six_count = 0
         Game.sound_playing = False
-        Game.team = None
+        Game.team, Game.scorecard = None, []
+        Game.batsman1,Game.batsman2="",""
 
         Game.all_sprites.add(Batsman(),Batsman(non_striker=True),Bowler())
 
@@ -152,6 +188,10 @@ class Game():
         Scoreboard.six_count = 0
         Scoreboard.balls_left = 60
         Scoreboard.runs_left = 0
+        Scoreboard.current_batsmen = [1,2]
+        Scoreboard.batsman_on_strike = 0
+        Scoreboard.txt1 = ""
+
 
         # Batsman
         Batsman.non_striker_can_move = False
@@ -215,7 +255,7 @@ class Game():
             Batsman.next_ball_event = True
             Game.dt = 0
             if Game.matchtype != "practice":
-                Scoreboard().update(Game.matchtype,Game.runs_scored, Game.six_count)
+                Scoreboard().update(Game.runs_scored)
             Game.next_ball_event = False
             Game.show_circle = False
 
@@ -235,10 +275,6 @@ class Game():
             Game.total_overs = "5"
             Scoreboard.target_runs = None
             Scoreboard.txt1 = "NO TARGET"
-            with open("assets/data/userdata.txt","r") as f:
-                lines = f.readlines()
-                prev_hs = lines[2].split()[4]
-            Scoreboard.txt2 = f"YOUR PREVIOUS HIGHSCORE IS {prev_hs}"
         else:
             Game.total_overs = "10"
             Game.team = team
@@ -253,8 +289,10 @@ class Game():
             elif match_type == "very hard":
                 Scoreboard.target_runs = random.randint(200,250)
             Scoreboard.runs_left = Scoreboard.target_runs
-            Scoreboard.txt1 = f"{team} : {Scoreboard.target_runs}"
-            Scoreboard.txt2 = f"NEED {str(Scoreboard.runs_left)} RUNS OFF {str(Scoreboard.balls_left)} BALLS"
+            Scoreboard.txt1 = f"{team} {Scoreboard.target_runs}/" + str(random.randint(0,10))
+        
+        Game.scorecard = get_scorecard("assets/data/players.csv")
+        Game.batsman1, Game.batsman2 = next_batsman("assets/data/players.csv")
 
 
     def check_runs_scored():
@@ -265,17 +303,23 @@ class Game():
         # checking the player input
         if Batsman.direction == Ball.direction:
 
-            if 100 <= Game.dr <= 400:
-                Game.runs_scored, Batsman.shot = 6, "loft"
-                Game.six_count += 1
+            if Scoreboard.batsman_on_strike == 0:
+                ch = 5 * int(Game.batsman1[1])-2
+            else:
+                ch = 5 * int(Game.batsman2[1])-2
 
-            elif 0 <= Game.dr <= 410:
+            if 100 <= Game.dr <= 400+ch:
+                Game.runs_scored, Batsman.shot = 6, "loft"
+                Scoreboard.six_count += 1
+                Game.scorecard[Scoreboard.current_batsmen[Scoreboard.batsman_on_strike]-1][3] += 1
+
+            elif 0 <= Game.dr <= 410+ch:
                 Game.runs_scored, Batsman.shot = "Catch-Out", "loft"
 
-            elif 0 <= Game.dr <= 475:
+            elif 0 <= Game.dr <= 475+ch:
                 Game.runs_scored, Batsman.shot = 4, "stroke"
 
-            elif 0 <= Game.dr <= 550:
+            elif 0 <= Game.dr <= 550+ch:
                 Game.runs_scored = random.choice([1,1,1,2,2,3])
                 Batsman.shot = "stroke"            
 
