@@ -279,15 +279,15 @@ class Game():
             Game.total_overs = "10"
             Game.team = team
             if match_type == "very easy":
-                Scoreboard.target_runs = random.randint(49,79)
+                Scoreboard.target_runs = random.randint(49,99)
             elif match_type == "easy":
-                Scoreboard.target_runs = random.randint(80,99)
-            elif match_type == "medium":
                 Scoreboard.target_runs = random.randint(100,149)
-            elif match_type == "hard":
+            elif match_type == "medium":
                 Scoreboard.target_runs = random.randint(150,199)
+            elif match_type == "hard":
+                Scoreboard.target_runs = random.randint(200,249)
             elif match_type == "very hard":
-                Scoreboard.target_runs = random.randint(200,250)
+                Scoreboard.target_runs = random.randint(250,279)
             Scoreboard.runs_left = Scoreboard.target_runs
             Scoreboard.txt1 = f"{team} {Scoreboard.target_runs}/" + str(random.randint(0,10))
         

@@ -345,21 +345,21 @@ while running:
             TEXT().blit(message,screen,pos)
 
         for i in range(len(Game.scorecard)):
-            TEXT().blit(Game.scorecard[i][0],screen,(112,240+22*i),size=15,align="left") 
+            TEXT().blit(Game.scorecard[i][0],screen,(112,238+22*i),size=15,color=(255,255,255),align="left") 
             if str(Game.scorecard[i][2]) == "0": continue
-            pos = (screen_width-270,240+22*i)
-            TEXT().blit(str(Game.scorecard[i][1]),screen,pos,size=15)    
-            pos = (screen_width-195,240+22*i)
-            TEXT().blit(str(Game.scorecard[i][2]),screen,pos,size=15)    
-            pos = (screen_width-125,240+22*i)
-            TEXT().blit(str(Game.scorecard[i][3]),screen,pos,size=15) 
-            pos = (screen_width-310,240+22*i)
-            TEXT().blit(str(Game.scorecard[i][4]),screen,pos,size=15,align="right")
+            pos = (screen_width-275,238+22*i)
+            TEXT().blit(str(Game.scorecard[i][1]),screen,pos,color=(255,255,255),size=15)    
+            pos = (screen_width-195,238+22*i)
+            TEXT().blit(str(Game.scorecard[i][2]),screen,pos,color=(255,255,255),size=15)    
+            pos = (screen_width-125,238+22*i)
+            TEXT().blit(str(Game.scorecard[i][3]),screen,pos,color=(255,255,255),size=15) 
+            pos = (screen_width-315,238+22*i)
+            TEXT().blit(str(Game.scorecard[i][4]),screen,pos,color=(255,255,255),size=15,align="right")
 
         pos = (screen_width-160,screen_height-98)
         TEXT().blit(Scoreboard.current_runs,screen,pos,20,color=(255,255,255))
-        pos = (screen_width-270,screen_height-98)
-        TEXT().blit(Scoreboard.current_overs,screen,pos,20,color=(255,255,255))
+        pos = (screen_width-265,screen_height-98)
+        TEXT().blit(Scoreboard.current_overs,screen,pos,20)
 
 
     # if the help/controls screen is open
