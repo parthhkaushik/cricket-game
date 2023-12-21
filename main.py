@@ -344,17 +344,17 @@ while running:
             pos = (screen_width/2,screen_height-50)
             TEXT().blit(message,screen,pos)
 
-        for i in range(len(Game.scorecard)-1):
-            TEXT().blit(Game.scorecard[i][0],screen,(100,240+24*i),size=16,color=(255,255,255),align="left") 
+        for i in range(len(Game.scorecard)):
+            TEXT().blit(Game.scorecard[i][0],screen,(112,240+22*i),size=15,align="left") 
             if str(Game.scorecard[i][2]) == "0": continue
-            pos = (screen_width-250,240+24*i)
-            TEXT().blit(str(Game.scorecard[i][1]),screen,pos,size=16,color=(255,255,255))    
-            pos = (screen_width-175,240+24*i)
-            TEXT().blit(str(Game.scorecard[i][2]),screen,pos,size=16,color=(255,255,255))    
-            pos = (screen_width-105,240+24*i)
-            TEXT().blit(str(Game.scorecard[i][3]),screen,pos,size=16,color=(255,255,255)) 
-            pos = (screen_width-290,240+24*i)
-            TEXT().blit(str(Game.scorecard[i][4]),screen,pos,size=16,color=(255,255,255),align="right")
+            pos = (screen_width-270,240+22*i)
+            TEXT().blit(str(Game.scorecard[i][1]),screen,pos,size=15)    
+            pos = (screen_width-195,240+22*i)
+            TEXT().blit(str(Game.scorecard[i][2]),screen,pos,size=15)    
+            pos = (screen_width-125,240+22*i)
+            TEXT().blit(str(Game.scorecard[i][3]),screen,pos,size=15) 
+            pos = (screen_width-310,240+22*i)
+            TEXT().blit(str(Game.scorecard[i][4]),screen,pos,size=15,align="right")
 
         pos = (screen_width-160,screen_height-98)
         TEXT().blit(Scoreboard.current_runs,screen,pos,20,color=(255,255,255))

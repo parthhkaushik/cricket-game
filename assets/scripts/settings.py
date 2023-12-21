@@ -129,7 +129,6 @@ def next_batsman(file,out=0):
             c+=1
 
 
-
 # shots
 shots = {
     "straight-loft":{"name":"advance-straight-drive","hit_pos":160},

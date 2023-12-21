@@ -313,13 +313,13 @@ class Game():
                 Scoreboard.six_count += 1
                 Game.scorecard[Scoreboard.current_batsmen[Scoreboard.batsman_on_strike]-1][3] += 1
 
-            elif 0 <= Game.dr <= 410+ch:
+            elif 0 <= Game.dr <= 410:
                 Game.runs_scored, Batsman.shot = "Catch-Out", "loft"
 
             elif 0 <= Game.dr <= 475+ch:
                 Game.runs_scored, Batsman.shot = 4, "stroke"
 
-            elif 0 <= Game.dr <= 550+ch:
+            elif 0 <= Game.dr <= 550:
                 Game.runs_scored = random.choice([1,1,1,2,2,3])
                 Batsman.shot = "stroke"            
 
