@@ -29,7 +29,8 @@ The project successfully fulfilled its purpose of deepening my understanding of 
 
 ## Controls
 
-- 
+- **Left, Right, and Down Arrow Keys:** Select the direction of your shot.
+- **Timing:** The key to a successful shot is timing. Press the arrow key at the right moment to get the best result.
 
 ## Credits & Acknowledgements
 
